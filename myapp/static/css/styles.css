@@ -1,0 +1,28 @@
+
+    /* Tambahkan font dari Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+body {
+  font-family: 'Poppins', sans-serif;
+}
+
+
+
+/* Tambahkan efek bayangan dan transisi */
+button {
+  transition: all 0.3s ease-in-out;
+}
+ 
+button:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Tambahkan efek hover pada baris tabel */
+tbody tr:hover {
+  background-color: #e0f2fe;
+}
+
+/* Tambahkan ikon */
+h1 i {
+  color: #4299e1;
+}

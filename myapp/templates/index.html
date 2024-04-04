@@ -1,0 +1,124 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<main class="xl:pl-96">
+    <div class="px-4 py-10 sm:px-6 lg:px-8 lg:py-6">
+        <div class="container mx-auto ">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-16"
+                    aria-label="Tabs">
+                    <a href="/"
+                        class="text-gray-500 hover:border-gray-300 hover:text-gray-700 group inline-flex items-center border-b-2 py-2 px-3 text-sm font-medium *: {% if request.path == '/' %}border-red-600 border-b-2 {% else %} border-transparent border-b-2 {% endif %}">
+                        <span>Home</span>
+                    </a>
+                    <a href="{% url 'OCCApp:index' %}"
+                        class="text-gray-500 hover:border-gray-300 hover:text-gray-700 group inline-flex items-center border-b-2 py-2 px-3 text-sm font-medium 
+                    {% if request.path == '/occ/' %}border-red-600 border-b-2 {% else %} border-transparent border-b-2 {% endif %}">
+                        <span>OCC</span>
+                    </a>
+                    <a
+                        href="{% url 'VendorApp:index' %}"
+                        class=" text-gray-500 hover:border-gray-300 hover:text-gray-700 group inline-flex items-center border-b-2 py-2 px-3 text-sm font-medium 
+                {% if request.path == '/vendor/' %}border-red-600 border-b-2 {% else %} border-transparent border-b-2 {% endif %}">
+                        <span>vendor </span>
+                    </a>
+
+                </nav>
+            </div>
+            <div class="border-gray-200">
+                <div class="mx-auto max-w-lg mt-10">
+                    <div class>
+                        <button type="button"
+                            class="relative block w-full rounded-lg border-t-2 border-r-2 border-l-2  border-dashed border-gray-300 p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            <div class="">
+                                <form method="post" enctype="multipart/form-data" class="max-w-2xl mx-auto p-6 bg-white rounded-lg ">
+                                    {% csrf_token %}
+                                
+                                    <div class="mb-6">
+                                        <label for="file" class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                                </svg>
+                                                <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                                <p class="text-xs text-gray-500">xlsx file only</p>
+                                                <div id="file-name-placeholder"></div>
+                                                <span id="file-error" class="text-red-500 mt-2 hidden">Please upload a file</span>
+                                            </div>
+                                            <input id="file" type="file" class="hidden" name="file" accept=".xlsx" required>
+                                        </label>
+                                    </div>
+                                
+                                    <div class="grid grid-cols-2 gap-4 mb-6 shadow-sm pb-5">
+                                        <label class="block text-sm font-semibold leading-6 text-gray-900">Vendor</label>
+                                        <select id="vendor" name="vendor" class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                            <option value="Pertamina">Pertamina</option>
+                                            <option value="Petronas Dagangan">Petronas Dagangan</option>
+                                            <option value="pttor">PTTOR</option>
+                                            <option value="bafs">BAFS</option>
+                                            <option value="Petronas Dagangan Berhad">Petronas Dagangan Berhad</option>
+                                            <option value="Shell" selected>Shell</option>
+                                            <option value="Petron">Petron</option>
+                                            <option value="AIRBP">AIRBP</option>
+                                            <option value="PTT Public Co. Ltd">PTT Public Co. Ltd</option>
+                                            <option value="Singapore Petroleum Company Limited">Singapore Petroleum Company Limited</option>
+                                            <option value="Shell Malaysia Trading">Shell Malaysia Trading</option>
+                                        </select>
+
+                                        <div class="flex flex-col px-7 w-full overflow-auto sm:overflow-visible">
+                                            <div class="flex items-center mb-2">
+                                                <div class="">
+                                                    <input type="date" id="date_of_data" name="date_of_data" class="block w-full bg-gray-200 text-gray-800 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500" required />
+                                                </div>
+                                                <span class="mx-4 text-gray-500">to</span>
+                                                <div class="">
+                                                    <input type="date" id="end_date_data" name="end_date_data" class="block w-full bg-gray-200 text-gray-800 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500" />
+                                                </div>                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="mt-8 inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-inset ring-indigo-600 hover:bg-indigo-500 sm:col-start-1 sm:mt-0">Upload</button>
+                                </form>     
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+<script>  
+const fileInput = document.getElementById('file');
+const fileNamePlaceholder = document.getElementById('file-name-placeholder');
+
+fileInput.addEventListener('change', function() {
+    const fileName = fileInput.files[0].name;
+    fileNamePlaceholder.textContent = fileName;
+});
+
+
+const errorValidasiInput = document.getElementById('file');
+const fileError = document.getElementById('file-error');
+
+errorValidasiInput.addEventListener('invalid', function(event) {
+    event.preventDefault();
+    fileError.classList.remove('hidden');
+}, false);
+
+errorValidasiInput.addEventListener('change', function() {
+    if (errorValidasiInput.value) {
+        fileError.classList.add('hidden');
+    }
+}, false);
+
+</script>
+
+
+{% include 'snippets/aside.html' %}
+
+{% endblock content %}

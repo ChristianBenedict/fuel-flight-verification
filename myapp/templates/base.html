@@ -1,0 +1,48 @@
+{% load static tailwind_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{ page_title }}</title>
+        {% tailwind_css %}
+        <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    </head>
+    <body>
+
+        <div>
+            <div class="bg-white">
+
+                <div x-data="{ open: false }"
+                    @keydown.window.escape="open = false">
+
+                    <!-- Static sidebar for phone -->
+                    {% include 'snippets/sidebarPhone.html' %}
+
+                    <!-- Static sidebar for desktop -->
+                    {% include 'snippets/sidebarDesktop.html' %}
+
+                    <div class="lg:pl-20">
+                        <!-- navbar -->
+                        {% include 'snippets/navbar.html' %}
+
+                        {% block content %}
+
+
+                        {% endblock content %}
+                    </div>
+
+                </div>
+            </div>
+
+            <script defer
+                src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+            <script type="text/javascript"
+                src="{% static 'js/alpine.js' %}"></script>
+                
+
+        </body>
+    </html>
