@@ -462,11 +462,23 @@ def result(request):
     total_vendor = request.session.get('total_vendor', 0)
     total_occ = request.session.get('total_occ', 0)
     missing_invoice_vendor = request.session.get('missing_invoice_vendor', [])
+    #pada missing_invoice_vendor, ubah format dari Date ke tipe data datetime
+    for item in missing_invoice_vendor:
+        item["Date"] = datetime.strptime(item['Date'], '%Y-%m-%d %H:%M:%S')
+
+        
     total_missing_invoice_vendor = request.session.get('total_missing_invoice_vendor', 0)
     # ubah total_missing_invoice_vendor ke int 
     total_missing_invoice_vendor = int(total_missing_invoice_vendor)
-    selisih = total_vendor - total_occ
+    total_selisih = total_vendor - total_occ
     
+    # Logika penghitungan selisih antara data uplift vendor dan occ
+    selisih_list = []
+    for occ, vendor in zip(missing_data_occ, missing_data_vendor):
+        uplift_occ = float(occ["Uplift_in_Lts"])
+        uplift_vendor = float(vendor["Uplift_in_Lts"])
+        selisih_list.append(uplift_occ - uplift_vendor)
+        
     # Logika untuk mendapatkan data dari sesi atau sumber lainnya
     if request.method == 'POST' and 'export_pdf' in request.POST:
         zipped_data = zip(request.session.get('missing_data_occ', []), request.session.get('missing_data_vendor', []))
@@ -475,7 +487,7 @@ def result(request):
             'zipped_data': zipped_data,
             'total_vendor': total_vendor,
             'total_occ': total_occ,
-            'selisih': selisih,
+            'total_selisih': total_selisih,
             'vendor': vendor,
             'missing_invoice_vendor': missing_invoice_vendor,
             'total_missing_invoice_vendor': total_missing_invoice_vendor,
@@ -495,10 +507,10 @@ def result(request):
     else:
         context = {
             'page_title': 'Result',
-            'zipped_data': zip(missing_data_occ, missing_data_vendor),
+            'zipped_data': zip(missing_data_occ, missing_data_vendor, selisih_list),
             'total_vendor': total_vendor,
             'total_occ': total_occ,
-            'selisih': selisih,
+            'total_selisih': total_selisih,
             'vendor': vendor,
             'missing_invoice_vendor': missing_invoice_vendor,
             'total_missing_invoice_vendor': total_missing_invoice_vendor,
