@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Export PDF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        h1 {
+            color: #333333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Data Export to PDF</h1>
+    <dl class="">
+        <div class="">
+          <dt class="">Total Uplift in Lts by IAA</dt>
+          <dd class="">{{ total_occ|floatformat:"-0" }}</dd>
+        </div>
+        <div class="">
+          <dt class="">Total Uplift in Lts by Pertamina</dt>
+          <dd class="">{{ total_vendor|floatformat:"-0" }}</dd>
+        </div>
+        <div class="">
+          <dt class="">Selisih</dt>
+          <dd class="">{{ selisih|floatformat:"-0" }}</dd>
+        </div>
+    </dl>
+    <table>
+        <thead>
+            <tr>
+                <th>Invoice</th>
+                <th>Date</th>
+                <th>Flight</th>
+                <th>Dep</th>
+                <th>Arr</th>
+                <th>Reg</th>
+                <th>Vendor Name</th>
+                <th>Uplift by OCC</th>
+                <th>Uplift by Vendor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for missing_data_occ, missing_data_vendor in zipped_data %}
+            <tr>
+                <td>{{ missing_data_occ.Invoice }}</td>
+                <td>{{ missing_data_occ.Date }}</td>
+                <td>{{ missing_data_occ.Flight }}</td>
+                <td>{{ missing_data_occ.Dep }}</td>
+                <td>{{ missing_data_occ.Arr }}</td>
+                <td>{{ missing_data_occ.Reg }}</td>
+                <td>{{ missing_data_occ.Fuel_Agent }}</td>
+                <td>{{ missing_data_occ.Uplift_in_Lts }}</td>
+                <td>{{ missing_data_vendor.Uplift_in_Lts }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Invoice</th>
+                <th>Date</th>
+                <th>Flight</th>
+                <th>Dep</th>
+                <th>Arr</th>
+                <th>Reg</th>
+                <th>Vendor Name</th>
+                <th>Uplift in Lts</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for missing_invoice_vendor  in missing_invoice_vendor %}
+            <tr>
+                <td>{{ missing_invoice_vendor.Invoice }}</td>
+                <td>{{ missing_invoice_vendor.Date }}</td>
+                <td>{{ missing_invoice_vendor.Flight }}</td>
+                <td>{{ missing_invoice_vendor.Dep }}</td>
+                <td>{{ missing_invoice_vendor.Arr }}</td>
+                <td>{{ missing_invoice_vendor.Reg }}</td>
+                <td>{{ missing_invoice_vendor.Vendor }}</td>
+                <td>{{ missing_invoice_vendor.Uplift_in_Lts }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="">
+        <dt class="">Total Uplift in Lts </dt>
+        <dd class="">{{ total_missing_invoice_vendor|floatformat:"-0" }}</dd>
+      </div>
+</body>
+</html>

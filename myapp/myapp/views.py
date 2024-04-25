@@ -1,7 +1,7 @@
 import re
 import django
 from django.shortcuts import render, redirect
-from django.urls import reverse
+from django.http import HttpResponse
 from django.contrib import messages
 from VendorApp.models import FuelVendor
 from OCCApp.models import FuelOcc
@@ -10,6 +10,15 @@ from .utils import get_data_from_sheet_by_date , get_data_from_sheet_by_date_and
 from ReconApp.models import Reconsiliasi, MissingInvoice,MissingInvoiceOcc
 import pandas as pd
 from django.contrib.auth import authenticate
+import pdfkit
+from django.template.loader import render_to_string
+from io import BytesIO
+
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from reportlab.platypus import Paragraph
+from reportlab.lib.styles import ParagraphStyle
 
 
 def index(request):
@@ -49,10 +58,9 @@ def index(request):
             # Mendapatkan data dari Google Sheet
             vendor = request.POST.get("vendor")
             fuel_occ = get_data_occ(date_of_data, end_date_data, vendor)
-            print('fuel_occ coy ', fuel_occ)
             
             
-            change_data_fuel(fuel_occ, fuel_vendor)
+            total_occ, total_vendor = change_data_fuel(fuel_occ, fuel_vendor)
 
 
             if fuel_occ is not None and fuel_vendor is not None:
@@ -77,7 +85,6 @@ def index(request):
             if missing_data_vendor and missing_data_occ:
                 for i in range(
                     len(missing_data_vendor)):  # Iterasi melalui daftar missing_data_vendor
-                    print(missing_data_vendor[i])  # Mencetak elemen daftar
 
                     # Konversi format tanggal dari DD/MM/YYYY ke YYYY-MM-DD untuk tanggal occ
                     date_occ_formatted = datetime.strptime(
@@ -166,9 +173,39 @@ def index(request):
                 )
                 failed_invoices = []
             
-        return redirect(
-            reverse("VendorApp:index")
-            )  # Redirect ke halaman index VendorApp
+            if vendor:
+                request.session['vendor'] = vendor
+            
+            if total_vendor :
+                request.session['total_vendor'] = total_vendor
+            if total_occ:
+                request.session['total_occ'] = total_occ
+            # Mengonversi objek FuelVendor menjadi dICTIONARY
+            if missing_data_vendor and missing_data_occ:
+                missing_data_vendor_dicts = [to_dict(item) for item in missing_data_vendor]
+                missing_data_occ_dicts = [to_dict_occ(item) for item in missing_data_occ]
+            
+                request.session['missing_data_occ'] = missing_data_occ_dicts
+                request.session['missing_data_vendor'] = missing_data_vendor_dicts
+                
+            if missing_invoice_vendor:
+                missing_invoice_vendor_dicts = [to_dict(item) for item in missing_invoice_vendor]
+                print('missing_invoice_vendor_dicts',missing_invoice_vendor_dicts)
+                total_missing_invoice_vendor = sum(item["Uplift_in_Lts"] for item in missing_invoice_vendor_dicts)
+                request.session['total_missing_invoice_vendor'] = total_missing_invoice_vendor
+                request.session['missing_invoice_vendor'] = missing_invoice_vendor_dicts
+
+            if missing_invoice_occ:
+                missing_invoice_occ_dicts = [to_dict_occ(item) for item in missing_invoice_occ]
+                # ambil total Uplift_in_Lts pada missing invoice vendor
+                total_missing_invoice_occ = sum(item["Uplift_in_Lts"] for item in missing_invoice_occ)
+                request.session['total_missing_invoice_occ'] = total_missing_invoice_occ
+                request.session['missing_invoice_occ'] = missing_invoice_occ_dicts
+            
+            
+            
+
+        return redirect('result') 
 
     # ambil data dari database Reconsiliasi
     reconsiliasi = Reconsiliasi.objects.all()
@@ -195,7 +232,7 @@ def process_uploaded_file(uploaded_file):
     columns_to_keep = ["Date", "Flight", "Dep", "Arr", "Reg", "Uplift_in_Lts", "Invoice"]
     df = df[columns_to_keep]
     df.columns = ["Date", "Flight", "Dep", "Arr", "Reg", "Uplift_in_Lts", "Invoice"]
-    
+        
     # Pembersihan data untuk berbagai format tanggal
     for index, row in df.iterrows():
         date_str = str(row['Date'])  # Konversi ke string untuk memastikan
@@ -209,10 +246,12 @@ def process_uploaded_file(uploaded_file):
 
         # Update nilai di data frame
         df.at[index, 'Date'] = date_str
-
+        
+        
         # Konversi kolom 'Date' ke tipe data datetime
-        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
-    
+        df['Date'] = pd.to_datetime(df['Date'], errors='coerce')   
+        
+   
     return df
         
         
@@ -255,9 +294,27 @@ def change_data_fuel(fuel_occ, fuel_vendor):
         # ubah tipe data Uplift_in_Lts dari string ke float
         fuel_occ[i]["Uplift_in_Lts"] = float(fuel_occ[i]["Uplift_in_Lts"])
         
+        # print semua data  Uplift_in_Lts by occ
+        print("fuel_occ" ,fuel_occ[i]["Uplift_in_Lts"])
+        
+        # ambil total Uplift_in_Lts by occ
+        total_occ = sum(float(item["Uplift_in_Lts"]) for item in fuel_occ)
+        
+        
+        
+        
     for i in range(len(fuel_vendor)):
         # ubah tipe data Uplift_in_Lts dari string ke float
         fuel_vendor[i].Uplift_in_Lts = float(fuel_vendor[i].Uplift_in_Lts)
+        
+        # print semua data  Uplift_in_Lts by vendor
+        print("fuel_vendor", fuel_vendor[i].Uplift_in_Lts)
+        
+        # ambil total Uplift_in_Lts by vendor
+        total_vendor = sum(item.Uplift_in_Lts for item in fuel_vendor)
+        
+    return total_occ, total_vendor
+    
         
 
     
@@ -280,8 +337,6 @@ def get_data_occ(date_of_data, end_date_data, vendor):
         return None
     
     
-    
-
 
 
                     
@@ -388,3 +443,94 @@ def login(request):
         else:
             return render(request, "login.html")
     return render(request, "login.html")
+
+
+
+
+
+
+from django.template.loader import render_to_string
+from django.http import HttpResponse
+from xhtml2pdf import pisa
+
+
+
+def result(request):
+    vendor = request.session.get('vendor', None)
+    missing_data_vendor = request.session.get('missing_data_vendor', [])
+    missing_data_occ = request.session.get('missing_data_occ', [])
+    total_vendor = request.session.get('total_vendor', 0)
+    total_occ = request.session.get('total_occ', 0)
+    missing_invoice_vendor = request.session.get('missing_invoice_vendor', [])
+    total_missing_invoice_vendor = request.session.get('total_missing_invoice_vendor', 0)
+    # ubah total_missing_invoice_vendor ke int 
+    total_missing_invoice_vendor = int(total_missing_invoice_vendor)
+    selisih = total_vendor - total_occ
+    
+    # Logika untuk mendapatkan data dari sesi atau sumber lainnya
+    if request.method == 'POST' and 'export_pdf' in request.POST:
+        zipped_data = zip(request.session.get('missing_data_occ', []), request.session.get('missing_data_vendor', []))
+        # Render template HTML dengan data yang sesuai
+        html_string = render_to_string('topdf.html', {
+            'zipped_data': zipped_data,
+            'total_vendor': total_vendor,
+            'total_occ': total_occ,
+            'selisih': selisih,
+            'vendor': vendor,
+            'missing_invoice_vendor': missing_invoice_vendor,
+            'total_missing_invoice_vendor': total_missing_invoice_vendor,
+        })
+
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="data_export.pdf"'
+
+        # Membuat PDF dari HTML menggunakan xhtml2pdf
+        pisa_status = pisa.CreatePDF(
+            html_string, dest=response)
+
+        # Jika pembuatan PDF berhasil, kirimkan respons
+        if pisa_status.err:
+            return HttpResponse('Terjadi kesalahan saat membuat PDF: %s' % pisa_status.err)
+        return response
+    else:
+        context = {
+            'page_title': 'Result',
+            'zipped_data': zip(missing_data_occ, missing_data_vendor),
+            'total_vendor': total_vendor,
+            'total_occ': total_occ,
+            'selisih': selisih,
+            'vendor': vendor,
+            'missing_invoice_vendor': missing_invoice_vendor,
+            'total_missing_invoice_vendor': total_missing_invoice_vendor,
+        }
+        return render(request, 'result.html', context)
+
+
+
+
+
+def to_dict(instance):
+    return {
+        'Date': str(instance.Date),
+        'Flight': instance.Flight,
+        'Dep': instance.Dep,
+        'Arr': instance.Arr,
+        'Reg': instance.Reg,
+        'Uplift_in_Lts': instance.Uplift_in_Lts,
+        'Invoice': instance.Invoice,
+        'Vendor': instance.Vendor,
+    }
+    
+
+def to_dict_occ(data_dict):
+    return {
+        'Date': data_dict["Date"],
+        'Flight': data_dict["Flight"],
+        'Dep': data_dict["Dep"],
+        'Arr': data_dict["Arr"],
+        'Reg': data_dict["Reg"],
+        'Uplift_in_Lts': data_dict["Uplift_in_Lts"],
+        'Invoice': data_dict["Invoice"],
+        'Fuel_Agent': data_dict["Fuel_Agent"],
+    }
+    

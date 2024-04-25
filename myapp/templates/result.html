@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div>
+    <div class="mx-auto max-w-7xl mt-8 px-4 sm:px-6 lg:px-8">
+        <div class="sm:flex sm:items-center">
+            <div class="sm:flex-auto">
+                <h1
+                    class=" text-xl font-semibold leading-6 text-gray-900">Hasil
+                    Rekonsiliasi</h1>
+            </div>
+            <div class="mt-4 sm:ml-16 sm:mt-0 flex ">
+                <form method="post">
+                    {% csrf_token %}
+                    <button class="block  rounded-md bg-white mr-1 px-2 py-2 text-center text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50" type="submit" name="export_pdf" value="true">Export as PDF</button>
+                </form>
+
+            </div>
+        </div>
+
+        <dl class="grid grid-cols-1 gap-5 sm:grid-cols-4 my-5">
+            <div class="overflow-hidden rounded-lg bg-white   sm:py-2">
+              <dt class="truncate text-sm font-medium text-gray-500">Total Uplift in Lts by IAA</dt>
+              <dd class="mt-1 text-xl font-semibold tracking-tight text-gray-900">{{ total_occ|floatformat:"-0" }}</dd>
+            </div>
+            <div class="overflow-hidden rounded-lg bg-white   sm:py-2">
+              <dt class="truncate text-sm font-medium text-gray-500">Total Uplift in Lts by Pertamina</dt>
+              <dd class="mt-1 text-xl font-semibold tracking-tight text-gray-900">{{ total_vendor|floatformat:"-0" }}</dd>
+            </div>
+            <div class="overflow-hidden rounded-lg bg-white   sm:py-2">
+              <dt class="truncate text-sm font-medium text-gray-500">Selisih</dt>
+              <dd class="mt-1 text-xl font-semibold tracking-tight text-gray-900">{{ selisih|floatformat:"-0" }}</dd>
+            </div>
+        </dl>
+
+    </div>
+    <div class="mt-2 flow-root overflow-hidden">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <table class="w-full text-left ">
+                <thead class="bg-white">
+                    <tr>
+                        <th scope="col"
+                            class="relative isolate py-3.5 pr-3 text-left text-sm font-semibold text-gray-900">
+                            Invoice #
+                            <div
+                                class="absolute inset-y-0 right-full -z-10 w-screen border-b border-b-gray-200"></div>
+                            <div
+                                class="absolute inset-y-0 left-0 -z-10 w-screen border-b border-b-gray-200"></div>
+                        </th>
+                        <th scope="col"
+                            class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 md:table-cell">Date</th>
+                        <th scope="col"
+                            class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 md:table-cell">Flight</th>
+                        <th scope="col"
+                            class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 md:table-cell">Dep</th>
+                        <th scope="col"
+                            class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 md:table-cell">Arr</th>
+                        <th scope="col"
+                            class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 md:table-cell">Reg</th>
+                        <th scope="col"
+                            class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 md:table-cell">Vendor Name</th>
+                        <th scope="col"
+                            class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Uplift_in_Lts by OCC | by {{ vendor }}</th>
+                        <th scope="col" class="relative py-3.5 ">
+                            <span class="sr-only">View</span>
+                        </th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for missing_data_occ, missing_data_vendor in zipped_data %}
+                    <tr class>
+                        <td
+                            class="relative py-4 pr-3 text-sm font-medium text-gray-900">
+                            {{ missing_data_occ.Invoice }}
+                        </td>
+                        <td
+                            class="hidden px-3 py-4 text-sm text-gray-500 md:table-cell">{{ missing_data_occ.Date }}</td>
+                        <td
+                            class="hidden px-3 py-4 text-sm text-gray-500 md:table-cell">{{ missing_data_occ.Flight }} </td>
+                        <td
+                            class="hidden px-3 py-4 text-sm text-gray-500 md:table-cell">{{ missing_data_occ.Dep }} </td>
+                        <td
+                            class="hidden px-3 py-4 text-sm text-gray-500 md:table-cell">{{ missing_data_occ.Arr }} </td>
+                        <td
+                            class="hidden px-3 py-4 text-sm text-gray-500 md:table-cell">{{ missing_data_occ.Reg }} </td>
+                        <td
+                            class="hidden px-3 py-4 text-sm text-gray-500 md:table-cell">{{ missing_data_occ.Fuel_Agent }} </td>
+                        
+                            <td class="px-4 py-2">
+                                <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm text-center font-medium text-red-700 bg-green-100">{{ missing_data_occ.Uplift_in_Lts|floatformat:"-0" }}</span> |
+                                <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm text-center font-medium bg-red-100">{{ missing_data_vendor.Uplift_in_Lts|floatformat:"-0" }}</span>
+                            </td>
+
+                        <td
+                            class="relative py-4 text-center text-sm font-medium ">
+                            <a href="#"
+                                class="text-indigo-600 hover:text-indigo-900 px-3 py-1 border rounded-md">View<span
+                                    class="sr-only"></span></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="flow-root overflow-hidden  mt-20 mb-10">
+        <div class="sm:flex sm:items-center">
+          <div class="sm:flex-auto">
+            <p class="px-6 mt-2 text-sm text-gray-700"><span class=" text-red-600 text-xl">**</span>Data dari {{ vendor }} Tidak Ditemukan dalam Rekaman IAA.</p>
+          </div>
+        </div>
+        <div class=" flow-root overflow-hidden ">
+          <div class="">
+            <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+              <table class="min-w-full divide-y divide-gray-300">
+                <thead>
+                  <tr>
+                    <th scope="col"
+                    class="relative isolate py-3.5 pr-3 text-left text-sm font-semibold text-gray-900">
+                    Invoice
+                    <div
+                        class="absolute inset-y-0 right-full -z-10 w-screen border-b border-b-gray-200"></div>
+                    <div
+                        class="absolute inset-y-0 left-0 -z-10 w-screen border-b border-b-gray-200"></div>
+                    </th>                  
+                    <th scope="col"
+                    class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 md:table-cell">Date</th>
+                    <th scope="col"
+                    class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 md:table-cell">Flight</th>
+                    <th scope="col"
+                    class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 md:table-cell">Dep</th>
+                    <th scope="col"
+                    class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 md:table-cell">Arr</th>
+                    <th scope="col"
+                    class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 md:table-cell">Reg</th>
+                    <th scope="col"
+                    class="hidden px-3 py-3.5 text-left text-sm font-semibold text-gray-900 md:table-cell">Vendor Name</th>
+                    <th scope="col"
+                    class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Uplift_in_Lts</th>
+                    
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for missing_invoice_vendor  in missing_invoice_vendor %}
+                    <tr class>
+                        <td
+                            class="relative py-4 pr-3 text-sm font-medium text-gray-900">
+                            {{ missing_invoice_vendor.Invoice }}
+                        </td>
+                        <td
+                            class="hidden px-3 py-4 text-sm text-gray-500 md:table-cell">{{ missing_invoice_vendor.Date }}</td>
+                        <td
+                            class="hidden px-3 py-4 text-sm text-gray-500 md:table-cell">{{ missing_invoice_vendor.Flight }} </td>
+                        <td
+                            class="hidden px-3 py-4 text-sm text-gray-500 md:table-cell">{{ missing_invoice_vendor.Dep }} </td>
+                        <td
+                            class="hidden px-3 py-4 text-sm text-gray-500 md:table-cell">{{ missing_invoice_vendor.Arr }} </td>
+                        <td
+                            class="hidden px-3 py-4 text-sm text-gray-500 md:table-cell">{{ missing_invoice_vendor.Reg }} </td>
+                        <td
+                            class="hidden px-3 py-4 text-sm text-gray-500 md:table-cell">{{ missing_invoice_vendor.Vendor }} </td>
+                        <td
+                            class=" px-3 py-4 text-sm text-gray-500 md:table-cell">{{ missing_invoice_vendor.Uplift_in_Lts|floatformat:"-0" }} </td>                                        
+                    </tr>
+                    {% endfor %}
+                </tbody>
+              </table>
+            <div class="flex justify-end mr-44 mt-5 ">
+                <h1 class=" font-bold">Total : <span>{{ total_missing_invoice_vendor }}</span></h1>
+            </div>
+
+            </div>
+          </div>
+        </div>
+    </div>
+      
+    
+    
+</div>
+
+{% endblock %}

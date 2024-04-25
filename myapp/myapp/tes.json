@@ -1,0 +1,22 @@
+missing_data_vendor cek bos [
+    {'Date': '2024-02-16 00: 00: 00', 'Flight': 'QZ474 ', 'Dep': 'CGK ', 'Arr': 'PNH ', 'Reg': 'PK-AZO      ', 'Uplift_in_Lts': 7000.0, 'Invoice': '047730390', 'Vendor': 'Pertamina'
+    },
+    {'Date': '2024-02-18 00: 00: 00', 'Flight': 'QZ260 ', 'Dep': 'CGK ', 'Arr': 'SIN ', 'Reg': 'PK-AXT      ', 'Uplift_in_Lts': 8000.0, 'Invoice': '04924503', 'Vendor': 'Pertamina'
+    },
+    {'Date': '2024-02-19 00: 00: 00', 'Flight': 'QZ260 ', 'Dep': 'CGK ', 'Arr': 'SIN ', 'Reg': 'PK-AXY      ', 'Uplift_in_Lts': 9000.0, 'Invoice': '05029953', 'Vendor': 'Pertamina'
+    },
+    {'Date': '2024-04-02 00: 00: 00', 'Flight': 'QZ619 ', 'Dep': 'BDJ ', 'Arr': 'DPS ', 'Reg': 'PK-AXX      ', 'Uplift_in_Lts': 10000.0, 'Invoice': '20240204-029', 'Vendor': 'Pertamina'
+    }
+]
+
+
+missing_data_occ cek bos [
+    {'Date': '16/02/2024', 'Flight': 'QZ474 ', 'Dep': 'CGK ', 'Arr': 'PNH ', 'Reg': 'PK-AZO      ', 'Uplift_in_Lts': 6003.0, 'Invoice': '047730390', 'Fuel_Agent': 'Pertamina'
+    },
+    {'Date': '18/02/2024', 'Flight': 'QZ260 ', 'Dep': 'CGK ', 'Arr': 'SIN ', 'Reg': 'PK-AXT      ', 'Uplift_in_Lts': 6611.0, 'Invoice': '04924503', 'Fuel_Agent': 'Pertamina'
+    },
+    {'Date': '19/02/2024', 'Flight': 'QZ260 ', 'Dep': 'CGK ', 'Arr': 'SIN ', 'Reg': 'PK-AXY      ', 'Uplift_in_Lts': 6470.0, 'Invoice': '05029953', 'Fuel_Agent': 'Pertamina'
+    },
+    {'Date': '04/02/2024', 'Flight': 'QZ619 ', 'Dep': 'BDJ ', 'Arr': 'DPS ', 'Reg': 'PK-AXX      ', 'Uplift_in_Lts': 3432.0, 'Invoice': '20240204-029', 'Fuel_Agent': 'Pertamina'
+    }
+]

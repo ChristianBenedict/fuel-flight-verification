@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Export PDF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        h1 {
+            color: #333333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Data History to PDF</h1>
+    <dl class="">
+        <div class="">
+          <dt class="">Total Uplift in Lts by IAA</dt>
+          <dd class="">{{ total_uplift_in_lts }}</dd>
+        </div>
+        <div class="">
+          <dt class="">Total Uplift in Lts by Pertamina</dt>
+          <dd class="">{{ total_uplift_in_lts_vendor }}</dd>
+        </div>
+        <div class="">
+          <dt class="">Selisih</dt>
+          <dd class="">{{ total_selisih }}</dd>
+        </div>
+    </dl>
+    <table>
+        <thead>
+            <tr>
+                <th>Invoice#</th>
+                <th>Date</th>
+                <th>Flight</th>
+                <th>Dep</th>
+                <th>Arr</th>
+                <th>Reg</th>
+                <th>Fuel Agent</th>
+                <th>Uplift by OCC</th>
+                <th>Uplift by Vendor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reconsiliasi in Reconsiliasi %}
+            <tr>
+                <td>{{ reconsiliasi.invoice_no }}</td>
+                <td>{{ reconsiliasi.date_occ }}</td>
+                <td>{{ reconsiliasi.flight_occ }}</td>
+                <td>{{ reconsiliasi.departure_occ }}</td>
+                <td>{{ reconsiliasi.arrival_occ }}</td>
+                <td>{{ reconsiliasi.registration_occ }}</td>
+                <td>{{ reconsiliasi.vendor }}</td>
+                <td>{{ reconsiliasi.uplift_in_lts_occ }}</td>
+                <td>{{ reconsiliasi.uplift_in_lts_ven }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p class="text-sm font-semibold leading-6 text-gray-600 pb-2">Data dari Vendor Tidak Ditemukan dalam Rekaman IAA</p>
+
+
+    <table>
+        <thead>
+            <tr>
+                <th>Invoice</th>
+                <th>Date</th>
+                <th>Flight</th>
+                <th>Dep</th>
+                <th>Arr</th>
+                <th>Reg</th>
+                <th>Vendor Name</th>
+                <th>Uplift in Lts</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for missingInvoice  in MissingInvoice %}
+            <tr>
+                <td>{{ missingInvoice.invoice_no }}</td>
+                <td>{{ missingInvoice.date|date:" N j, Y" }}</td>
+                <td>{{ missingInvoice.flight }}</td>
+                <td>{{ missingInvoice.departure }}</td>
+                <td>{{ missingInvoice.arrival }}</td>
+                <td>{{ missingInvoice.registration }}</td>
+                <td>{{ missingInvoice.Vendor }}</td>
+                <td>{{ missingInvoice.uplift_in_lts }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="">
+        <dt class="">Total Uplift in Lts </dt>
+        <dd class="">{{ total_uplift_in_lts_vendor}}</dd>
+      </div>
+</body>
+</html>
