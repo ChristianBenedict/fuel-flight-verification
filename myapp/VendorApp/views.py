@@ -35,6 +35,8 @@ def index(request):
         "Fuel_vendors": page_obj,
         "Reconsiliasi": reconsiliasi,
         'total_uplift_in_lts':total_uplift_in_lts,
+        'start_date': start_date,
+        'end_date': end_date,
     }
 
     return render(request, "vendor/index.html", context)

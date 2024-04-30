@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block content %}
 <style>
@@ -81,19 +82,35 @@
     </form>
     </div>
   </div>
+  
+
+
+  {% if Start_date and End_date %}
+  <p class="text-sm">Rekonsiliasi Data Tagihan Fuel IAA dengan Fuel Agent <span class="text-red-600">{{ Start_date|date:" N j, Y"   }}</span>  sampai <span class="text-red-600">{{ End_date|date:" N j, Y"  }}</span>  </p>
+
+  {% elif Start_date and not End_date %}
+  <p class="text-sm">Rekonsiliasi Data Tagihan Fuel IAA dengan Fuel Agent mulai dari <span class="text-red-600">{{ Start_date|date:" N j, Y"   }}</span>   </p>
+
+  {% elif not Start_date and End_date %}
+  <p class="text-sm">Rekonsiliasi Data Tagihan Fuel IAA dengan Fuel Agent sampai tanggal <span class="text-red-600">{{ End_date|date:" N j, Y"   }}</span>   </p>
+  {% else %}
+  <p class="text-sm">Rekonsiliasi Data Tagihan Fuel IAA dengan Fuel Agent </p>
+  {% endif %}
+
+
     <div class="py-5">
-      <dl class="grid grid-cols-1 gap-5 sm:grid-cols-3 mx-6 mb-2">
+      <dl class="grid grid-cols-1 gap-5 sm:grid-cols-3  mb-2">
         <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt class="truncate text-sm font-medium text-gray-500">Total Uplift in Lts by IAA</dt>
-          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_uplift_in_lts }}</dd>
+          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_uplift_in_lts|intcomma }}</dd>
         </div>
         <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt class="truncate text-sm font-medium text-gray-500">Total Uplift in Lts by Vendor</dt>
-          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_uplift_in_lts_vendor }}</dd>
+          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_uplift_in_lts_vendor|intcomma }}</dd>
         </div>
         <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt class="truncate text-sm font-medium text-gray-500">Total Selisih</dt>
-          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_selisih }}</dd>
+          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_selisih|intcomma }}</dd>
         </div>
       </dl>
       </div>
@@ -153,13 +170,13 @@
           <td class="p-3 text-right hidden sm:table-cell">
 						<p>{{ reconsiliasi.vendor }}</p>
 					</td>
-          <td class="p-3 text-center"> <span class=" rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm  font-medium  bg-green-200">{{ reconsiliasi.uplift_in_lts_occ|floatformat:"-0" }}</span> 
+          <td class="p-3 text-center"> <span class=" rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm  font-medium  bg-green-200">{{ reconsiliasi.uplift_in_lts_occ|floatformat:"-0"|intcomma }}</span> 
     
 					</td>
-          <td class="p-3 text-center "> <span class="rounded-md whitespace-nowrap text-center  mt-0.5 px-2 py-0.5 text-sm   font-medium bg-green-200" >{{ reconsiliasi.uplift_in_lts_ven|floatformat:"-0" }}</span>
+          <td class="p-3 text-center "> <span class="rounded-md whitespace-nowrap text-center  mt-0.5 px-2 py-0.5 text-sm   font-medium bg-green-200" >{{ reconsiliasi.uplift_in_lts_ven|floatformat:"-0"|intcomma }}</span>
           </td>
           
-          <td class="p-3 text-center "> <span class="rounded-md whitespace-nowrap text-center  mt-0.5 px-2 py-0.5 text-sm  font-medium bg-red-200" >{{ reconsiliasi.selisih }}</span>
+          <td class="p-3 text-center "> <span class="rounded-md whitespace-nowrap text-center  mt-0.5 px-2 py-0.5 text-sm  font-medium bg-red-200" >{{ reconsiliasi.selisih|intcomma }}</span>
           </td>
 				</tr>
         {% endfor %}
@@ -223,7 +240,7 @@
 						<p>{{ missingInvoice.Vendor }}</p>
 					</td>
           <td class="p-3 text-right">
-            <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm text-center font-medium bg-red-100">{{ missingInvoice.uplift_in_lts|floatformat:"-0" }}</span>
+            <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm text-center font-medium bg-red-100">{{ missingInvoice.uplift_in_lts|floatformat:"-0"|intcomma }}</span>
 					</td>
 		
 				</tr>

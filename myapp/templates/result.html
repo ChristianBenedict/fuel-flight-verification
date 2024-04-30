@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load humanize %}
 
 {% block content %}
 <div>
@@ -9,6 +10,7 @@
                 <h1
                     class=" text-xl font-semibold leading-6 text-gray-900">Hasil
                     Rekonsiliasi</h1>
+                    <p class="text-sm">Rekonsiliasi Data Tagihan Fuel IAA - {{ Vendor_name }} <span class="text-red-600">{{ Data_start_date|date:" N j, Y"  }}</span>  sampai <span class="text-red-600">{{ Data_end_date|date:" N j, Y" }}</span>  </p>
             </div>
             <div class="mt-4 sm:ml-16 sm:mt-0 flex ">
                 <form method="post">
@@ -20,18 +22,18 @@
         </div>
 
         <div class="py-5">
-            <dl class="grid grid-cols-1 gap-5 sm:grid-cols-3 mx-6 mb-2">
+            <dl class="grid grid-cols-1 gap-5 sm:grid-cols-3  mb-2">
               <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
                 <dt class="truncate text-sm font-medium text-gray-500">Total Uplift in Lts by IAA</dt>
-                <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_occ|floatformat:"-0" }}</dd>
+                <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_occ|floatformat:"-2"|intcomma }}</dd>
               </div>
               <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
                 <dt class="truncate text-sm font-medium text-gray-500">Total Uplift in Lts by Vendor</dt>
-                <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_vendor|floatformat:"-0" }}</dd>
+                <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_vendor|floatformat:"-0"|intcomma }}</dd>
               </div>
               <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
                 <dt class="truncate text-sm font-medium text-gray-500">Total Selisih</dt>
-                <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_selisih|floatformat:"-0" }}</dd>
+                <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_selisih|floatformat:"-0"|intcomma }}</dd>
               </div>
             </dl>
             </div>
@@ -87,13 +89,13 @@
                             <p>{{ missing_data_occ.Fuel_Agent }}</p>
                         </td>
                         <td class="p-3 text-center">
-                            <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-green-200">{{ missing_data_occ.Uplift_in_Lts|floatformat:"-0" }}</span>
+                            <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-green-200">{{ missing_data_occ.Uplift_in_Lts|floatformat:"-0"|intcomma }}</span>
                         </td>
                         <td class="p-3 text-center">
-                            <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-green-200">{{ missing_data_vendor.Uplift_in_Lts|floatformat:"-0" }}</span>
+                            <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-green-200">{{ missing_data_vendor.Uplift_in_Lts|floatformat:"-0"|intcomma }}</span>
                         </td>
                         <td class="p-3 ">
-                            <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-red-200">{{ selisih  }}</span>
+                            <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-red-200">{{ selisih|floatformat:"-0"|intcomma  }}</span>
                         </td>
                     </tr>
                     
@@ -108,7 +110,7 @@
     <div class="flow-root overflow-hidden  mt-20 mb-10">
         <div class="sm:flex sm:items-center">
           <div class="sm:flex-auto">
-            <p class="px-6 mt-2 text-sm text-gray-700"><span class=" text-red-600 text-xl">**</span>Data dari {{ vendor }} Tidak Ditemukan dalam Rekaman IAA.</p>
+            <p class="px-6 mt-2 text-sm text-gray-700"><span class=" text-red-600 text-xl">**</span>Data dari {{ Vendor_name }} Tidak Ditemukan dalam Rekaman IAA.</p>
           </div>
         </div>
         <div class=" container p-2 mx-auto sm:p-4 ">
@@ -160,7 +162,7 @@
                                 <p>{{ missing_invoice_vendor.Vendor }}</p>
                             </td>
                             <td class="p-3">
-                                <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-red-200">{{ missing_invoice_vendor.Uplift_in_Lts|floatformat:"-0" }}</span>
+                                <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-red-200">{{ missing_invoice_vendor.Uplift_in_Lts|floatformat:"-0"|intcomma }}</span>
                             </td>
                         </tr>
                         {% endfor %}
@@ -168,7 +170,7 @@
                   </table>
 
             <div class="flex justify-end mr-40 mt-5 ">
-                <h1 class=" font-bold">Total : <span>{{ total_missing_invoice_vendor }}</span></h1>
+                <h1 class=" font-bold">Total : <span>{{ total_missing_invoice_vendor|intcomma }}</span></h1>
             </div>
             </div>
           
