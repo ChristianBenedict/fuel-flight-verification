@@ -1,107 +1,96 @@
 from django.shortcuts import render
-from .models import Reconsiliasi, MissingInvoice
+from .models import  Result, DetailResult ,MissingInvoiceInVendor, MissingInvoiceInOcc
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from datetime import datetime
+from django.template.loader import render_to_string
+
 
 # Create your views here.
 def index(request):
-    try:
-        start_date = request.GET.get("start_date")
-        end_date = request.GET.get("end_date")
-
-        if start_date and end_date:
-            reconsiliasi = Reconsiliasi.objects.filter(
-                date_occ__gte=start_date, date_occ__lte=end_date
-            )
-            missing_invoice = MissingInvoice.objects.filter(
-                date__gte=start_date, date__lte=end_date
-            )
-        elif start_date:
-            # ambil data reconsiliation dari database yang tanggalnya sama dengan start_date
-            reconsiliasi = Reconsiliasi.objects.filter(
-                date_occ=start_date
-            )
-            # ambil data missing invoice dari database yang tanggalnya sama dengan start_date
-            missing_invoice = MissingInvoice.objects.filter(
-                date=start_date
-            )
-        else:
-            # jika date_of_data dan end_date_data adalah none
-            reconsiliasi = Reconsiliasi.objects.all()
-            # ambil data missing invoice dari database
-            missing_invoice = MissingInvoice.objects.all()
-
-        if not reconsiliasi.exists() and not missing_invoice.exists():
-            return render(request, 'recon/noresult.html')
-
-        total_uplift_in_lts = 0
-        total_uplift_in_lts_vendor = 0
-        total_missing_lts = 0
-
-        for row in reconsiliasi:
-            total_uplift_in_lts += int(row.uplift_in_lts_occ)
-            total_uplift_in_lts_vendor += int(row.uplift_in_lts_ven)
-
-        for row in missing_invoice:
-            total_missing_lts += int(row.uplift_in_lts)
-
-        total_selisih = total_uplift_in_lts_vendor - total_uplift_in_lts
-
-        # selisih
-        for row in reconsiliasi:
-            row.selisih = int(row.uplift_in_lts_ven) - int(row.uplift_in_lts_occ)
-
-        # export to pdf
-
-        # ubah tipe data dari  start_date dan end_date menjadi datetime
-        if start_date:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d')
-        if end_date:
-            end_date = datetime.strptime(end_date, '%Y-%m-%d')
-
-        if request.method == 'POST' and 'export_history_to_pdf' in request.POST:
-            print('export to pdfco ')
-            template_path = 'recon/pdf_history.html'
-            context = {
-                'Reconsiliasi': reconsiliasi,
-                'total_uplift_in_lts': total_uplift_in_lts,
-                'total_uplift_in_lts_vendor': total_uplift_in_lts_vendor,
-                'MissingInvoice': missing_invoice,
-                'total_missing_lts': total_missing_lts,
-                'total_selisih': total_selisih,
-                'Start_date': start_date,
-                'End_date': end_date,
-
-            }
-            response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="historical_data.pdf"'
-            template = get_template(template_path)
-            html = template.render(context)
-            pisa_status = pisa.CreatePDF(html, dest=response)
-            if pisa_status.err:
-                return HttpResponse('We had some errors <pre>' + html + '</pre>')
-            return response
-        else:
-            context = {
-                'page_title': 'Historical Data',
-                'Reconsiliasi': reconsiliasi,
-                'total_uplift_in_lts': total_uplift_in_lts,
-                'total_uplift_in_lts_vendor': total_uplift_in_lts_vendor,
-                'MissingInvoice': missing_invoice,
-                'total_missing_lts': total_missing_lts,
-                'total_selisih': total_selisih,
-                'Start_date': start_date,
-                'End_date': end_date,
-            }
-
-        return render(request, 'recon/index.html', context)
-
-    except Exception as e:
-        # Handle the exception here
-        return render(request, 'recon/error.html', {'error_message': str(e)})
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+    
+    #ambil data DetailResult dari database dalam rentang tanggal start_date dan end_date
+    if start_date and end_date:
+        detail_results = DetailResult.objects.filter(
+            date_occ__gte=start_date, date_occ__lte=end_date
+        )
+    # ambil data latest_missing_invoices_in_vendor dari database dalam rentang tanggal start_date dan end_date
+        missing_invoices_in_vendor = MissingInvoiceInVendor.objects.filter(
+            date__gte=start_date, date__lte=end_date
+        )
+    # ambil data latest_missing_invoices_in_occ dari database dalam rentang tanggal start_date dan end_date
+        missing_invoices_in_occ = MissingInvoiceInOcc.objects.filter(
+            date__gte=start_date, date__lte=end_date
+        )
+        
+    elif start_date:
+        # ambil data DetailResult dari database yang tanggalnya sama dengan start_date
+        detail_results = DetailResult.objects.filter(
+            date_occ=start_date
+        )
+        
+        # ambil data latest_missing_invoices_in_vendor dari database yang tanggalnya sama dengan start_date
+        missing_invoices_in_vendor = MissingInvoiceInVendor.objects.filter(
+            date=start_date
+        )
+        
+        # ambil data latest_missing_invoices_in_occ dari database yang tanggalnya sama dengan start_date
+        missing_invoices_in_occ = MissingInvoiceInOcc.objects.filter(
+            date=start_date
+        )
+    else:
+        # Mengambil entri terbaru dari model Result
+        latest_result = Result.objects.latest('time_of_event')
+        # Mengambil detail result yang terkait dengan entri terbaru dari Result
+        latest_detail_results = latest_result.detail_results.all()
+        try:
+            latest_missing_invoices_in_vendor = latest_result.missing_invoices_in_vendor.all()
+        except:
+            latest_missing_invoices_in_vendor = None    
+        # buat total_missing_invoices_in_vendor
+        total_missing_invoices_in_vendor = 0
+        if latest_missing_invoices_in_vendor:
+            for item in latest_missing_invoices_in_vendor:
+                total_missing_invoices_in_vendor += item.uplift_in_lts
+        try:
+            latest_missing_invoices_in_occ = latest_result.missing_invoices_in_occ.all()
+        except:
+            latest_missing_invoices_in_occ = None  
+            
+        
+    if request.method == "POST" and 'export_history_to_pdf' in request.POST:  
+        template_path = 'recon/pdf_history.html' 
+        context = {
+            'latest_result': latest_result,
+            'latest_detail_results': latest_detail_results,
+            'latest_missing_invoices_in_vendor': latest_missing_invoices_in_vendor,
+            'latest_missing_invoices_in_occ': latest_missing_invoices_in_occ,
+            'total_missing_invoices_in_vendor': total_missing_invoices_in_vendor,
+        }
+            
+        # Render template
+        html_string = render_to_string(template_path, context)
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="data_export.pdf"'
+        # Create PDF
+        pisa_status = pisa.CreatePDF(html_string, dest=response)
+        if pisa_status.err:
+            return HttpResponse('Terjadi kesalahan saat membuat PDF: %s' % pisa_status.err)
+        return response
+    else:  
+        context = {
+            'latest_result': latest_result,
+            'latest_detail_results': latest_detail_results,
+            'latest_missing_invoices_in_vendor': latest_missing_invoices_in_vendor,
+            'latest_missing_invoices_in_occ': latest_missing_invoices_in_occ,
+            'total_missing_invoices_in_vendor': total_missing_invoices_in_vendor,
+        }
+    
+    return render(request, 'recon/index.html', context)
 
 
 

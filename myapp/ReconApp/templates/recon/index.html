@@ -102,15 +102,15 @@
       <dl class="grid grid-cols-1 gap-5 sm:grid-cols-3  mb-2">
         <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt class="truncate text-sm font-medium text-gray-500">Total Uplift in Lts by IAA</dt>
-          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_uplift_in_lts|intcomma }}</dd>
+          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ latest_result.total_uplift_in_lts_occ|floatformat:"-0"|intcomma }}</dd>
         </div>
         <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt class="truncate text-sm font-medium text-gray-500">Total Uplift in Lts by Vendor</dt>
-          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_uplift_in_lts_vendor|intcomma }}</dd>
+          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ latest_result.total_uplift_in_lts_ven|floatformat:"-0"|intcomma }}</dd>
         </div>
         <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt class="truncate text-sm font-medium text-gray-500">Total Selisih</dt>
-          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_selisih|intcomma }}</dd>
+          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ latest_result.total_selisih|floatformat:"-0"|intcomma }}</dd>
         </div>
       </dl>
       </div>
@@ -120,69 +120,67 @@
 
 <div class="container p-2 mx-auto sm:p-4 ">
 	<div class="overflow-x-auto">
-		<table class="min-w-full text-xs">
-			<colgroup>
-				<col>
-				<col>
-				<col>
-				<col>
-				<col>
-				<col class="w-24">
-			</colgroup>
-			<thead class="dark:bg-gray-300 ">
-				<tr class="text-left">
-					<th class="p-3">Invoice #</th>
-					<th class="hidden sm:table-cell p-3">Date</th>
-					<th class="hidden sm:table-cell p-3">Flight</th>
-					<th class="hidden sm:table-cell p-3">Dep</th>
-					<th class="hidden sm:table-cell p-3 text-right">Arr</th>
-          <th class="hidden sm:table-cell p-3 text-right">Reg</th>
-          <th class="hidden sm:table-cell p-3 text-right">Vendor</th>
-          <th class="p-3 text-right">Uplift In Lts By IAA</th>
-          <th class="p-3 text-right">Uplift In Lts By Vendor</th>
-					<th class=" text-right pr-8">Selisih</th>
-				</tr>
-			</thead>
-			<tbody>
-   
-  
-
-        {% for reconsiliasi in Reconsiliasi %}
-				<tr class="border-b border-opacity-20 dark:border-gray-300 dark:bg-gray-50">
-					<td class="p-3">
-						<p>{{ reconsiliasi.invoice_no }}</p>
-					</td>
-					<td class="p-3 hidden sm:table-cell">
-						<p>{{ reconsiliasi.date_occ|date:" N j, Y" }}</p>
-					</td>
-					<td class="p-3 hidden sm:table-cell">
-						<p class="dark:text-gray-600">{{ reconsiliasi.flight_occ }}</p>
-					</td>
-					<td class="p-3 hidden sm:table-cell">
-						<p class="dark:text-gray-600">{{ reconsiliasi.departure_occ }}</p>
-					</td>
-					<td class="p-3 text-right hidden sm:table-cell">
-						<p>{{ reconsiliasi.arrival_occ }}</p>
-					</td>
-          <td class="p-3 text-right hidden sm:table-cell">
-						<p>{{ reconsiliasi.registration_occ }}</p>
-					</td>
-          <td class="p-3 text-right hidden sm:table-cell">
-						<p>{{ reconsiliasi.vendor }}</p>
-					</td>
-          <td class="p-3 text-center"> <span class=" rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm  font-medium  bg-green-200">{{ reconsiliasi.uplift_in_lts_occ|floatformat:"-0"|intcomma }}</span> 
-    
-					</td>
-          <td class="p-3 text-center "> <span class="rounded-md whitespace-nowrap text-center  mt-0.5 px-2 py-0.5 text-sm   font-medium bg-green-200" >{{ reconsiliasi.uplift_in_lts_ven|floatformat:"-0"|intcomma }}</span>
-          </td>
-          
-          <td class="p-3 text-center "> <span class="rounded-md whitespace-nowrap text-center  mt-0.5 px-2 py-0.5 text-sm  font-medium bg-red-200" >{{ reconsiliasi.selisih|intcomma }}</span>
-          </td>
-				</tr>
+    <table class="min-w-full text-xs">
+      <colgroup>
+          <col>
+          <col>
+          <col>
+          <col>
+          <col>
+          <col class="w-24">
+      </colgroup>
+      <thead class="dark:bg-gray-300 ">
+          <tr class="text-left">
+              <th class="p-3">Invoice #</th>
+              <th class="hidden sm:table-cell p-3">Date</th>
+              <th class="hidden sm:table-cell p-3">Flight</th>
+              <th class="hidden sm:table-cell p-3">Dep</th>
+              <th class="hidden sm:table-cell p-3 ">Arr</th>
+              <th class="hidden sm:table-cell p-3 ">Reg</th>
+              <th class="hidden sm:table-cell p-3 ">Fuel Agent Name</th>
+              <th class="p-3 ">Uplift In Lts By IAA</th>
+              <th class="p-3 ">Uplift In Lts By Fuel Agent</th>
+              <th class="pr-3">Selisih</th>
+          </tr>
+      </thead>
+      <tbody>
+        {% for detail_result in latest_detail_results %}
+        <tr class="border-b border-opacity-20 dark:border-gray-300 dark:bg-gray-50">
+            <td class="p-3">
+                <p>{{ detail_result.invoice_no }}</p>
+            </td>
+            <td class="p-3 hidden sm:table-cell">
+                <p>{{ detail_result.date_occ }}</p>
+            </td>
+            <td class="p-3 hidden sm:table-cell">
+                <p class="dark:text-gray-600">{{ detail_result.flight_occ }}</p>
+            </td>
+            <td class="p-3 hidden sm:table-cell">
+                <p class="dark:text-gray-600">{{ detail_result.departure_occ }}</p>
+            </td>
+            <td class="p-3  hidden sm:table-cell">
+                <p>{{ detail_result.arrival_occ }}</p>
+            </td>
+            <td class="p-3  hidden sm:table-cell">
+                <p>{{ detail_result.registration_occ }}</p>
+            </td>
+            <td class="p-3  hidden sm:table-cell">
+                <p>{{ detail_result.fuel_agent }}</p>
+            </td>
+            <td class="p-3 text-center">
+                <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-green-200">{{ detail_result.uplift_in_lts_occ}}</span>
+            </td>
+            <td class="p-3 text-center">
+                <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-green-200">{{ detail_result.uplift_in_lts_ven }}</span>
+            </td>
+            
+            <td class="p-3 ">
+                <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-red-200">{{ detail_result.selisih|floatformat:"-0"|intcomma }}</span>
+            </td>
+        </tr>
         {% endfor %}
-  
-			</tbody>
-		</table>
+          </tbody>
+  </table>
 	</div>
 </div>
 
@@ -191,67 +189,62 @@
 <div class="container p-2 mt-4 mb-4 mx-auto sm:p-4 dark:text-gray-800">
 	<p class="text-sm font-semibold leading-6 text-gray-600 pb-2">Data dari Vendor Tidak Ditemukan dalam Rekaman IAA</p>
 	<div class="overflow-x-auto">
-		<table class="min-w-full text-xs">
-			<colgroup>
-				<col>
-				<col>
-				<col>
-				<col>
-				<col>
-				<col class="w-24">
-			</colgroup>
-			<thead class="dark:bg-gray-300 ">
-				<tr class="text-left">
-					<th class="p-3">Invoice #</th>
-					<th class="hidden sm:table-cell p-3">Date</th>
-					<th class="hidden sm:table-cell p-3">Flight</th>
-					<th class="hidden sm:table-cell p-3">Dep</th>
-					<th class="hidden sm:table-cell p-3 text-right">Arr</th>
-          <th class="hidden sm:table-cell p-3 text-right">Reg</th>
-          <th class="hidden sm:table-cell p-3 text-right">Vendor</th>
-          <th class="p-3 text-right">Uplift In Lts</th>
-					<th class=" text-right pr-8"></th>
-				</tr>
-			</thead>
-			<tbody>
-  
-
-        {% for missingInvoice in MissingInvoice %}
-				<tr class="border-b border-opacity-20 dark:border-gray-300 dark:bg-gray-50">
-					<td class="p-3">
-						<p>{{ missingInvoice.invoice_no }}</p>
-					</td>
-					<td class="p-3 hidden sm:table-cell">
-						<p>{{ missingInvoice.date|date:" N j, Y" }}</p>
-					</td>
-					<td class="p-3 hidden sm:table-cell">
-						<p class="dark:text-gray-600">{{ missingInvoice.flight }}</p>
-					</td>
-					<td class="p-3 hidden sm:table-cell">
-						<p class="dark:text-gray-600">{{ missingInvoice.departure }}</p>
-					</td>
-					<td class="p-3 text-right hidden sm:table-cell">
-						<p>{{ missingInvoice.arrival }}</p>
-					</td>
-          <td class="p-3 text-right hidden sm:table-cell">
-						<p>{{ missingInvoice.registration }}</p>
-					</td>
-          <td class="p-3 text-right hidden sm:table-cell">
-						<p>{{ missingInvoice.Vendor }}</p>
-					</td>
-          <td class="p-3 text-right">
-            <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm text-center font-medium bg-red-100">{{ missingInvoice.uplift_in_lts|floatformat:"-0"|intcomma }}</span>
-					</td>
-		
-				</tr>
-        {% endfor %}
-  
-			</tbody>
-		</table>
+    <table class="min-w-full text-xs">
+      <colgroup>
+          <col>
+          <col>
+          <col>
+          <col>
+          <col>
+          <col class="w-24">
+      </colgroup>
+      <thead class="dark:bg-gray-300 ">
+          <tr class="text-left">
+              <th class="p-3">Invoice #</th>
+              <th class="hidden sm:table-cell p-3">Date</th>
+              <th class="hidden sm:table-cell p-3">Flight</th>
+              <th class="hidden sm:table-cell p-3">Dep</th>
+              <th class="hidden sm:table-cell p-3 ">Arr</th>
+              <th class="hidden sm:table-cell p-3 ">Reg</th>
+              <th class="hidden sm:table-cell p-3 ">Fuel Agent Name</th>
+              <th class="p-3 ">Uplift In Lts By IAA</th>
+          </tr>
+      </thead>
+      <tbody>
+        {% for missing_invoices_in_vendor  in latest_missing_invoices_in_vendor %}
+          <tr class="border-b border-opacity-20 dark:border-gray-300 dark:bg-gray-50">
+              <td class="p-3">
+                  <p>{{ missing_invoices_in_vendor.invoice_no }}</p>
+              </td>
+              <td class="p-3 hidden sm:table-cell">
+                  <p>{{ missing_invoices_in_vendor.date|date:"Y/m/d" }}</p>
+              </td>
+              
+              <td class="p-3 hidden sm:table-cell">
+                  <p class="dark:text-gray-600">{{ missing_invoices_in_vendor.flight }}</p>
+              </td>
+              <td class="p-3 hidden sm:table-cell">
+                  <p class="dark:text-gray-600">{{ missing_invoices_in_vendor.departure }}</p>
+              </td>
+              <td class="p-3  hidden sm:table-cell">
+                  <p>{{ missing_invoices_in_vendor.arrival }}</p>
+              </td>
+              <td class="p-3  hidden sm:table-cell">
+                  <p>{{ missing_invoices_in_vendor.registration }}</p>
+              </td>
+              <td class="p-3  hidden sm:table-cell">
+                  <p>{{ missing_invoices_in_vendor.fuel_agent }}</p>
+              </td>
+              <td class="p-3">
+                  <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-red-200">{{ missing_invoices_in_vendor.uplift_in_lts|floatformat:"-0"|intcomma }}</span>
+              </td>
+          </tr>
+          {% endfor %}
+      </tbody>
+    </table>
+<div class="flex justify-end mr-40 mt-5 ">
+  <h1 class=" font-bold">Total : <span>{{ total_missing_invoices_in_vendor|intcomma }}</span></h1>
+</div>
 	</div>
 </div>
-
-
-
-
 {% endblock content %}

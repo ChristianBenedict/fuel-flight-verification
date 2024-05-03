@@ -6,10 +6,12 @@ from django.contrib import messages
 from VendorApp.models import FuelVendor
 from datetime import datetime
 from .utils import get_data_from_sheet_by_date , get_data_from_sheet_by_date_and_end_date
-from ReconApp.models import Reconsiliasi, MissingInvoice,MissingInvoiceOcc
+from ReconApp.models import Reconsiliasi, MissingInvoice,MissingInvoiceOcc, Result, DetailResult,MissingInvoiceInVendor,MissingInvoiceInOcc
 import pandas as pd
 from django.contrib.auth import authenticate
 from django.template.loader import render_to_string
+from xhtml2pdf import pisa
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 
 
 
@@ -31,32 +33,20 @@ def index(request):
 
         # memeriksa validate form
         if 'file' in request.FILES and request.FILES['file'].name.endswith('.xlsx') and request.POST.get("date_of_data") is not None:
-
             # Mendapatkan file yang diunggah dari form
             uploaded_file = request.FILES["file"]
-            
-            
             # Proses file yang diunggah
             df = process_uploaded_file(uploaded_file)
-
             # Menyimpan data dari DataFrame ke database
             fuel_vendor=saveVendorToDatabase(df, request, failed_invoices, successful_invoices)
-            
-
             # Jika form di-submit
             data_start_date = request.POST.get("date_of_data")  # mendapatkan tanggal dari form
             data_end_date=request.POST.get("end_date_data")  
-            
-                           
             # Mendapatkan data dari Google Sheet
             vendor = request.POST.get("vendor")
             fuel_occ = get_data_occ(data_start_date, data_end_date, vendor)
-            
-            
             total_occ, total_vendor = change_data_fuel(fuel_occ, fuel_vendor)
-            
             total_selisih = total_vendor - total_occ
-
 
             if fuel_occ is not None and fuel_vendor is not None:
                 # cari panjang data fuel_occ dan fuel_vendor
@@ -76,23 +66,33 @@ def index(request):
                 elif len_fuel_occ < len_fuel_vendor:                            
                     missing_data_vendor, missing_data_occ, missing_invoice_vendor,missing_invoice_occ = reconcile_data_occ_less_than_vendor(fuel_occ, fuel_vendor, missing_data_vendor, missing_data_occ, missing_invoice_vendor,missing_invoice_occ)                            
                             
+            result_obj = Result.objects.create(
+                time_of_event=datetime.now(),  # Menggunakan waktu saat ini
+                data_start_date=data_start_date,
+                data_end_date=data_end_date,
+                total_uplift_in_lts_occ=total_occ,
+                total_uplift_in_lts_ven=total_vendor,
+                total_selisih=total_selisih,
+                fuel_agent=vendor,
+            )
+
+            detail_result_objects = []
 
             if missing_data_vendor and missing_data_occ:
-                for i in range(
-                    len(missing_data_vendor)):  # Iterasi melalui daftar missing_data_vendor
-
+                for i in range(len(missing_data_vendor)):
                     # Konversi format tanggal dari DD/MM/YYYY ke YYYY-MM-DD untuk tanggal occ
-                    date_occ_formatted = datetime.strptime(
-                        missing_data_occ[i]["Date"], "%d/%m/%Y").strftime("%Y-%m-%d")
+                    date_occ_formatted = datetime.strptime(missing_data_occ[i]["Date"], "%d/%m/%Y").strftime("%Y-%m-%d")
 
-                    # Konversi format tanggal dari YYYY-MM-DD ke YYYY-MM-DD untuk tanggal vendor (jika belum dalam format yang benar)
+                        # Konversi format tanggal dari YYYY-MM-DD ke YYYY-MM-DD untuk tanggal vendor (jika belum dalam format yang benar)
                     date_ven_formatted = (
-                        missing_data_vendor[i].Date.strftime("%Y-%m-%d")
+                         missing_data_vendor[i].Date.strftime("%Y-%m-%d")
                         if isinstance(missing_data_vendor[i].Date, datetime)
-                        else missing_data_vendor[i].Date)
+                        else missing_data_vendor[i].Date
+                    )
 
-                    # Membuat objek Reconsiliasi dan menyimpannya ke database
-                    missing_data_obj = Reconsiliasi(
+                        # Membuat objek DetailResult dan menghubungkannya dengan Result
+                    detail_result_obj = DetailResult(
+                        result=result_obj,
                         date_occ=date_occ_formatted,
                         flight_occ=missing_data_occ[i]["Flight"],
                         departure_occ=missing_data_occ[i]["Dep"],
@@ -106,10 +106,16 @@ def index(request):
                         registration_ven=missing_data_vendor[i].Reg,
                         uplift_in_lts_ven=missing_data_vendor[i].Uplift_in_Lts,
                         invoice_no=missing_data_vendor[i].Invoice,
-                        vendor=missing_data_vendor[i].Vendor,
+                        fuel_agent=missing_data_vendor[i].Vendor,
+                        selisih=missing_data_occ[i]["Uplift_in_Lts"] - missing_data_vendor[i].Uplift_in_Lts,
                     )
-                    missing_data_obj.save()  # Menyimpan objek Reconsiliasi ke database
+                    detail_result_objects.append(detail_result_obj)
 
+                    # Menyimpan semua objek DetailResult ke database
+                DetailResult.objects.bulk_create(detail_result_objects)                
+
+            missing_invoice_in_vendor_objects=[]
+            
             if missing_invoice_vendor:
                 for i in range(len(missing_invoice_vendor)):
                     date_formated = (
@@ -119,7 +125,8 @@ def index(request):
                     )
                     
                     # Membuat objek MissingInvoice dan menyimpannya ke database
-                    missing_invoice_obj = MissingInvoice(
+                    missing_invoice_obj = MissingInvoiceInVendor(
+                        result=result_obj,
                         date=date_formated,
                         flight=missing_invoice_vendor[i].Flight,
                         departure=missing_invoice_vendor[i].Dep,
@@ -127,20 +134,21 @@ def index(request):
                         registration=missing_invoice_vendor[i].Reg,
                         uplift_in_lts=missing_invoice_vendor[i].Uplift_in_Lts,
                         invoice_no=missing_invoice_vendor[i].Invoice,  
-                        Vendor=missing_invoice_vendor[i].Vendor,
+                        fuel_agent=missing_invoice_vendor[i].Vendor,
                     )
-                    missing_invoice_obj.save()
-                    
+                    missing_invoice_in_vendor_objects.append(missing_invoice_obj)                    
+                MissingInvoiceInVendor.objects.bulk_create(missing_invoice_in_vendor_objects)
+                
+            missing_invoice_in_occ_objects=[]
             if missing_invoice_occ:
-                #['“16/02/2024” value has an invalid date format. It must be in YYYY-MM-DD format.']
                 for i in range(len(missing_invoice_occ)):
                     # Konversi format tanggal dari DD/MM/YYYY ke YYYY-MM-DD
                     date_formated = datetime.strptime(
                         missing_invoice_occ[i]["Date"], "%d/%m/%Y").strftime("%Y-%m-%d")
                     
-                    
                     # Membuat objek MissingInvoice dan menyimpannya ke database
-                    missing_invoice_occ_obj = MissingInvoiceOcc(
+                    missing_invoice_occ_obj = MissingInvoiceInOcc(
+                        result=result_obj,
                         date=date_formated,
                         flight=missing_invoice_occ[i]["Flight"],
                         departure=missing_invoice_occ[i]["Dep"],
@@ -148,9 +156,10 @@ def index(request):
                         registration=missing_invoice_occ[i]["Reg"],
                         uplift_in_lts=missing_invoice_occ[i]["Uplift_in_Lts"],
                         invoice_no=missing_invoice_occ[i]["Invoice"],
-                        vendor=missing_invoice_occ[i]["Fuel_Agent"],
+                        fuel_agent=missing_invoice_occ[i]["Fuel_Agent"],
                     )
-                    missing_invoice_occ_obj.save()
+                    missing_invoice_in_occ_objects.append(missing_invoice_occ_obj)
+                MissingInvoiceInOcc.objects.bulk_create(missing_invoice_in_occ_objects)
 
             if successful_invoices:
                 successful_invoices_str = [str(invoice) for invoice in successful_invoices]
@@ -165,53 +174,13 @@ def index(request):
                     request,f"Data dengan invoice {', '.join(failed_invoices_str)} sudah ada di database.",
                 )
                 failed_invoices = []
-            
-            if vendor:
-                request.session['vendor_name'] = vendor
-            if data_start_date and data_end_date:
-                request.session['data_start_date'] = data_start_date
-                request.session['data_end_date'] = data_end_date
-            
-            if total_vendor :
-                request.session['total_vendor'] = total_vendor
-            if total_occ:
-                request.session['total_occ'] = total_occ
-            
-            if total_selisih:
-                request.session['total_selisih'] = total_selisih
-                
-            # Mengonversi objek FuelVendor menjadi dICTIONARY
-            if missing_data_vendor and missing_data_occ:
-                missing_data_vendor_dicts = [to_dict(item) for item in missing_data_vendor]
-                missing_data_occ_dicts = [to_dict_occ(item) for item in missing_data_occ]
-            
-                request.session['missing_data_occ'] = missing_data_occ_dicts
-                request.session['missing_data_vendor'] = missing_data_vendor_dicts
-                
-            if missing_invoice_vendor:
-                missing_invoice_vendor_dicts = [to_dict(item) for item in missing_invoice_vendor]
-                total_missing_invoice_vendor = sum(item["Uplift_in_Lts"] for item in missing_invoice_vendor_dicts)
-                request.session['total_missing_invoice_vendor'] = total_missing_invoice_vendor
-                request.session['missing_invoice_vendor'] = missing_invoice_vendor_dicts
-
-            if missing_invoice_occ:
-                missing_invoice_occ_dicts = [to_dict_occ(item) for item in missing_invoice_occ]
-                # ambil total Uplift_in_Lts pada missing invoice vendor
-                total_missing_invoice_occ = sum(item["Uplift_in_Lts"] for item in missing_invoice_occ)
-                request.session['total_missing_invoice_occ'] = total_missing_invoice_occ
-                request.session['missing_invoice_occ'] = missing_invoice_occ_dicts
-            
-            
              
         return redirect('result') 
 
 
-    # ambil data dari database Reconsiliasi
-    reconsiliasi = Reconsiliasi.objects.all()
-
     context = {
         "page_title": "Home",
-        "Reconsiliasi": reconsiliasi,
+        
         }
     
     return render(request, "index.html", context)
@@ -312,7 +281,6 @@ def change_data_fuel(fuel_occ, fuel_vendor):
     return total_occ, total_vendor
     
         
-
     
 
 def get_data_occ(data_start_date, data_end_date, vendor):
@@ -333,8 +301,6 @@ def get_data_occ(data_start_date, data_end_date, vendor):
         return None
     
     
-
-
                     
 # Fungsi rekonsiliasi data jika len_fuel_occ < len_fuel_vendor
 def reconcile_data_occ_less_than_vendor(fuel_occ, fuel_vendor, missing_data_vendor, missing_data_occ, missing_invoice_vendor, missing_invoice_occ):
@@ -359,8 +325,7 @@ def reconcile_data_occ_less_than_vendor(fuel_occ, fuel_vendor, missing_data_vend
 
     return missing_data_vendor, missing_data_occ, missing_invoice_vendor, missing_invoice_occ
 
-              
-            
+                    
             
 # fungsi rekonsiliasi data jika len_fuel_occ dan len_fuel_vendor sama
 def reconcile_data_occ_equal_vendor(fuel_occ, fuel_vendor, missing_data_vendor, missing_data_occ, missing_invoice_vendor, missing_invoice_occ):
@@ -400,7 +365,6 @@ def reconcile_data_occ_equal_vendor(fuel_occ, fuel_vendor, missing_data_vendor, 
     return missing_data_vendor, missing_data_occ, missing_invoice_vendor, missing_invoice_occ
 
 
-
 # Fungsi rekonsiliasi data jika len_fuel_occ > len_fuel_vendor
 def reconcile_data_occ_greater_than_vendor(fuel_occ, fuel_vendor, missing_data_vendor, missing_data_occ, missing_invoices_occ, missing_invoice_vendor):
     # Mengambil set Invoice dari fuel_vendor
@@ -426,13 +390,11 @@ def reconcile_data_occ_greater_than_vendor(fuel_occ, fuel_vendor, missing_data_v
 
 
 
-
 def login(request):
     if request.method == "POST":
         username = request.POST["username"]
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
-        print(user)
         if user is not None:
             django.contrib.auth.login(request, user)
             return render(request, "index.html")
@@ -442,109 +404,54 @@ def login(request):
 
 
 
-
-
-
-from django.template.loader import render_to_string
-from django.http import HttpResponse
-from xhtml2pdf import pisa
-
-
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.contrib import messages
-from datetime import datetime
-
-
 def result(request):
+    # Mengambil entri terbaru dari model Result
+    latest_result = Result.objects.latest('time_of_event')
+    # Mengambil detail result yang terkait dengan entri terbaru dari Result
+    latest_detail_results = latest_result.detail_results.all()
     try:
-        vendor_name = request.session.get('vendor_name', None)
-        data_start_date = request.session.get('data_start_date', None)
-        data_end_date = request.session.get('data_end_date', None)
-        missing_data_vendor = request.session.get('missing_data_vendor', [])
-        missing_data_occ = request.session.get('missing_data_occ', [])
-        total_vendor = request.session.get('total_vendor', 0)
-        total_occ = request.session.get('total_occ', 0)
-        missing_invoice_vendor = request.session.get('missing_invoice_vendor', [])
-
-        for item in missing_invoice_vendor:
-            try:
-                item["Date"] = datetime.strptime(item['Date'], '%Y-%m-%d %H:%M:%S')
-            except ValueError:
-                messages.error(request, f"Format tanggal '{item['Date']}' tidak valid.")
-
-        total_selisih = request.session.get('total_selisih', 0)
-        data_start_date = datetime.strptime(data_start_date, '%Y-%m-%d')
-        data_end_date = datetime.strptime(data_end_date, '%Y-%m-%d')
-        total_missing_invoice_vendor = request.session.get('total_missing_invoice_vendor', 0)
-        total_missing_invoice_vendor = int(total_missing_invoice_vendor)
-
-        selisih_list = []
-        for occ, vendor in zip(missing_data_occ, missing_data_vendor):
-            try:
-                uplift_occ = float(occ["Uplift_in_Lts"])
-                uplift_vendor = float(vendor["Uplift_in_Lts"])
-                selisih_list.append(uplift_occ - uplift_vendor)
-            except ValueError:
-                messages.error(request, f"Nilai 'Uplift_in_Lts' tidak valid untuk OCC: {occ} dan Vendor: {vendor}")
-
-        if request.method == 'POST' and 'export_pdf' in request.POST:
-            zipped_data = zip(request.session.get('missing_data_occ', []), request.session.get('missing_data_vendor', []), selisih_list)
-            html_string = render_to_string('topdf.html', {
-                'zipped_data': zipped_data,
-                'total_vendor': total_vendor,
-                'total_occ': total_occ,
-                'total_selisih': total_selisih,
-                'Vendor_name': vendor_name,
-                'Data_start_date': data_start_date,
-                'Data_end_date': data_end_date,
-                'missing_invoice_vendor': missing_invoice_vendor,
-                'total_missing_invoice_vendor': total_missing_invoice_vendor,
-            })
-
-            response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="data_export.pdf"'
-
-            pisa_status = pisa.CreatePDF(html_string, dest=response)
-
-            if pisa_status.err:
-                return HttpResponse('Terjadi kesalahan saat membuat PDF: %s' % pisa_status.err)
-            return response
-
-        else:
-            if missing_data_vendor and missing_data_occ:
-                print('masuk coy')
-                context = {
-                    'page_title': 'Result',
-                    'zipped_data': zip(missing_data_occ, missing_data_vendor, selisih_list),
-                    'total_vendor': total_vendor,
-                    'total_occ': total_occ,
-                    'total_selisih': total_selisih,
-                    'Vendor_name': vendor_name,
-                    'Data_start_date': data_start_date,
-                    'Data_end_date': data_end_date,
-                    'missing_invoice_vendor': missing_invoice_vendor,
-                    'total_missing_invoice_vendor': total_missing_invoice_vendor,
-                }
-                response = render(request, 'result.html', context)
-                request.session.flush()
-                return response
-            else:
-                print('salah masuk')
-                return render(request, 'no_results.html')
-
-    except KeyError as e:
-        messages.error(request, f"Kunci '{e.args[0]}' tidak ditemukan dalam session.")
-        return render(request, 'no_results.html', {})  # Kembalikan respons dengan template kosong
-    except ObjectDoesNotExist as e:
-        messages.error(request, str(e))
-        return render(request, 'no_results.html', {})  # Kembalikan respons dengan template kosong
-    except ValidationError as e:
-        messages.error(request, str(e))
-        return render(request, 'no_results.html', {})  # Kembalikan respons dengan template kosong
-    except Exception as e:
-        messages.error(request, str(e))
-        return render(request, 'no_results.html', {})  # Kembalikan respons dengan template kosong
-
+        latest_missing_invoices_in_vendor = latest_result.missing_invoices_in_vendor.all()
+    except:
+        latest_missing_invoices_in_vendor = None    
+    # buat total_missing_invoices_in_vendor
+    total_missing_invoices_in_vendor = 0
+    if latest_missing_invoices_in_vendor:
+        for item in latest_missing_invoices_in_vendor:
+            total_missing_invoices_in_vendor += item.uplift_in_lts
+    try:
+        latest_missing_invoices_in_occ = latest_result.missing_invoices_in_occ.all()
+    except:
+        latest_missing_invoices_in_occ = None  
+        
+    
+    if request.method == "POST" and 'export_pdf' in request.POST:  
+        template_path = 'topdf.html' 
+        context = {
+            'latest_result': latest_result,
+            'latest_detail_results': latest_detail_results,
+            'latest_missing_invoices_in_vendor': latest_missing_invoices_in_vendor,
+            'latest_missing_invoices_in_occ': latest_missing_invoices_in_occ,
+            'total_missing_invoices_in_vendor': total_missing_invoices_in_vendor,
+        }
+        # Render template
+        html_string = render_to_string(template_path, context)
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="data_export.pdf"'
+        # Create PDF
+        pisa_status = pisa.CreatePDF(html_string, dest=response)
+        if pisa_status.err:
+            return HttpResponse('Terjadi kesalahan saat membuat PDF: %s' % pisa_status.err)
+        return response
+    else:  
+        context = {
+            'latest_result': latest_result,
+            'latest_detail_results': latest_detail_results,
+            'latest_missing_invoices_in_vendor': latest_missing_invoices_in_vendor,
+            'latest_missing_invoices_in_occ': latest_missing_invoices_in_occ,
+            'total_missing_invoices_in_vendor': total_missing_invoices_in_vendor,
+        }
+    
+    return render(request, 'result.html', context)
 
 
 
@@ -561,6 +468,7 @@ def to_dict(instance):
     }
     
 
+
 def to_dict_occ(data_dict):
     return {
         'Date': data_dict["Date"],
@@ -574,5 +482,4 @@ def to_dict_occ(data_dict):
     }
     
 
-def test(request):
-    return render(request, 'test.html')
+

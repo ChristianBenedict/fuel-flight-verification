@@ -1,112 +1,88 @@
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Export PDF</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            border: 1px solid #dddddd;
-            text-align: left;
-            padding: 8px;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        h1 {
-            color: #333333;
-        }
-    </style>
 </head>
-<body>
-    <h1>Data History to PDF</h1>
-    <dl class="">
-        <div class="">
-          <dt class="">Total Uplift in Lts by IAA</dt>
-          <dd class="">{{ total_uplift_in_lts }}</dd>
+<body style="font-family: Arial, sans-serif;">
+    <h1 style="color: #252525;font-size: 20px;margin-bottom: 10px; " >Hasil rekonsiliasi data pembelian minyak </h1>
+    <div style="display: flex; flex-direction: column; ">
+        <div class="total">
+            <p style="color: #252525; font-size: 12px; text-align: left; font-weight:bold;">Total Uplift in Lts by IAA: {{ latest_result.total_uplift_in_lts_occ|floatformat:"-0"|intcomma }} </p>
         </div>
-        <div class="">
-          <dt class="">Total Uplift in Lts by Pertamina</dt>
-          <dd class="">{{ total_uplift_in_lts_vendor }}</dd>
+        <div class="total">
+            <p style="color: #252525; font-size: 12px; text-align: left; font-weight:bold;">Total Uplift in Lts by Pertamina: {{ latest_result.total_uplift_in_lts_ven|floatformat:"-0"|intcomma }}</p>
         </div>
-        <div class="">
-          <dt class="">Selisih</dt>
-          <dd class="">{{ total_selisih }}</dd>
+        <div class="total">
+            <p style="color: #252525; font-size: 12px; text-align: left; border-bottom: 1px solid #837f7f; font-weight:bold;">Total Selisih: {{ latest_result.total_selisih|floatformat:"-0"|intcomma }}</p>
         </div>
-    </dl>
-    <table>
+    </div>
+    <table style="width: 100%;border-collapse: collapse;margin-top: 50px; margin-bottom: 40px;">
         <thead>
             <tr>
-                <th>Invoice#</th>
-                <th>Date</th>
-                <th>Flight</th>
-                <th>Dep</th>
-                <th>Arr</th>
-                <th>Reg</th>
-                <th>Fuel Agent</th>
-                <th>Uplift by OCC</th>
-                <th>Uplift by Vendor</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Invoice</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Date</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Flight</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Dep</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Arr</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Reg</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Vendor Name</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Uplift by OCC</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Uplift by Vendor</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Selisih</th>        
             </tr>
         </thead>
         <tbody>
-            {% for reconsiliasi in Reconsiliasi %}
+            {% for detail_result in latest_detail_results %}
             <tr>
-                <td>{{ reconsiliasi.invoice_no }}</td>
-                <td>{{ reconsiliasi.date_occ }}</td>
-                <td>{{ reconsiliasi.flight_occ }}</td>
-                <td>{{ reconsiliasi.departure_occ }}</td>
-                <td>{{ reconsiliasi.arrival_occ }}</td>
-                <td>{{ reconsiliasi.registration_occ }}</td>
-                <td>{{ reconsiliasi.vendor }}</td>
-                <td>{{ reconsiliasi.uplift_in_lts_occ }}</td>
-                <td>{{ reconsiliasi.uplift_in_lts_ven }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ detail_result.invoice_no }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ detail_result.date_occ }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ detail_result.flight_occ }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ detail_result.departure_occ }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ detail_result.arrival_occ }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ detail_result.registration_occ }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ detail_result.fuel_agent }}</td>
+                <td style="border: 1px solid #dddddd;text-align: center;padding: 4px;">{{ detail_result.uplift_in_lts_occ|floatformat:"-0"|intcomma }}</td>
+                <td style="border: 1px solid #dddddd;text-align: center;padding: 4px;">{{ detail_result.uplift_in_lts_ven|floatformat:"-0"|intcomma }}</td>
+                <td style="border: 1px solid #dddddd;text-align: center;padding: 4px;">{{ detail_result.selisih|floatformat:"-0"|intcomma }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <p class="text-sm font-semibold leading-6 text-gray-600 pb-2">Data dari Vendor Tidak Ditemukan dalam Rekaman IAA</p>
-
-
+    <p class="invoice" style="color:black;font-size:12px;"><span style="color: rgb(233, 48, 48);">***</span>Data dari {{ latest_result.fuel_agent }} Tidak Ditemukan dalam Rekaman IAA.</p>
     <table>
         <thead>
             <tr>
-                <th>Invoice</th>
-                <th>Date</th>
-                <th>Flight</th>
-                <th>Dep</th>
-                <th>Arr</th>
-                <th>Reg</th>
-                <th>Vendor Name</th>
-                <th>Uplift in Lts</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Invoice</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Date</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Flight</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Dep</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Arr</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Reg</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Vendor Name</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Uplift in Lts</th>
             </tr>
         </thead>
         <tbody>
-            {% for missingInvoice  in MissingInvoice %}
+            {% for missing_invoices_in_vendor  in latest_missing_invoices_in_vendor %}
             <tr>
-                <td>{{ missingInvoice.invoice_no }}</td>
-                <td>{{ missingInvoice.date|date:" N j, Y" }}</td>
-                <td>{{ missingInvoice.flight }}</td>
-                <td>{{ missingInvoice.departure }}</td>
-                <td>{{ missingInvoice.arrival }}</td>
-                <td>{{ missingInvoice.registration }}</td>
-                <td>{{ missingInvoice.Vendor }}</td>
-                <td>{{ missingInvoice.uplift_in_lts }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.invoice_no }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.date|date:"Y/m/d" }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.flight }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.departure }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.arrival }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.registration }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.fuel_agent }}</td>
+                <td style="border: 1px solid #dddddd;text-align: center;padding: 4px;">{{ missing_invoices_in_vendor.uplift_in_lts|floatformat:"-0"|intcomma }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    <div class="">
-        <dt class="">Total Uplift in Lts </dt>
-        <dd class="">{{ total_uplift_in_lts_vendor}}</dd>
-      </div>
+    <div style="color: #252525;margin-top: 30px;margin-bottom: 20px;text-align: right;float: right;font-weight: 600;font-size: large;">
+        <dt class="">Total Uplift in Lts : {{ total_missing_invoices_in_vendor|intcomma }}</dt>
+    </div>
 </body>
 </html>

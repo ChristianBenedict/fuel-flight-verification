@@ -1,7 +1,7 @@
 
 from django.contrib import admin
 from django.urls import path, include
-from myapp.views import index, login, result, test
+from myapp.views import index, login, result
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -12,5 +12,4 @@ urlpatterns = [
     path('occ/', include('OCCApp.urls', namespace='OCCApp')),
     path('vendor/', include('VendorApp.urls', namespace='VendorApp')),
     path('recon/', include('ReconApp.urls', namespace='ReconApp')),
-    path('test/',test, name='test')
 ]
