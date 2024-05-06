@@ -6,7 +6,7 @@ from django.contrib import messages
 from VendorApp.models import FuelVendor
 from datetime import datetime
 from .utils import get_data_from_sheet_by_date , get_data_from_sheet_by_date_and_end_date
-from ReconApp.models import Reconsiliasi, MissingInvoice,MissingInvoiceOcc, Result, DetailResult,MissingInvoiceInVendor,MissingInvoiceInOcc
+from ReconApp.models import  Result, DetailResult,MissingInvoiceInVendor,MissingInvoiceInOcc
 import pandas as pd
 from django.contrib.auth import authenticate
 from django.template.loader import render_to_string
@@ -23,7 +23,6 @@ def index(request):
     missing_data_occ = [] # List untuk menyimpan data yang tidak sama antara vendor dan occ
     missing_invoice_vendor = [] # List untuk menyimpan invoice yang tidak ada di data occ
     missing_invoice_occ = [] # List untuk menyimpan invoice yang tidak ada di data vendor padahal di occ ada
-
     successful_invoices = [] # List untuk menyimpan invoice yang berhasil diinputkan ke database
     failed_invoices = [] # List untuk menyimpan invoice yang sudah ada di database
     fuel_vendor = None
@@ -54,7 +53,6 @@ def index(request):
                 len_fuel_vendor = len(fuel_vendor)
 
                 # jika panjang data fuel_occ dan fuel_vendor sama,
-                
                 if len_fuel_occ == len_fuel_vendor:
                     # panggil fungsi reconcile_data_occ_equal_vendor
                     missing_data_vendor, missing_data_occ, missing_invoice_vendor, missing_invoice_occ = reconcile_data_occ_equal_vendor(fuel_occ, fuel_vendor, missing_data_vendor, missing_data_occ, missing_invoice_vendor, missing_invoice_occ)

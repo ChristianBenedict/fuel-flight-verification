@@ -15,31 +15,31 @@ def index(request):
     
     #ambil data DetailResult dari database dalam rentang tanggal start_date dan end_date
     if start_date and end_date:
-        detail_results = DetailResult.objects.filter(
+        latest_detail_results = DetailResult.objects.filter(
             date_occ__gte=start_date, date_occ__lte=end_date
         )
     # ambil data latest_missing_invoices_in_vendor dari database dalam rentang tanggal start_date dan end_date
-        missing_invoices_in_vendor = MissingInvoiceInVendor.objects.filter(
+        latest_missing_invoices_in_vendor = MissingInvoiceInVendor.objects.filter(
             date__gte=start_date, date__lte=end_date
         )
     # ambil data latest_missing_invoices_in_occ dari database dalam rentang tanggal start_date dan end_date
-        missing_invoices_in_occ = MissingInvoiceInOcc.objects.filter(
+        latest_missing_invoices_in_occ = MissingInvoiceInOcc.objects.filter(
             date__gte=start_date, date__lte=end_date
         )
         
     elif start_date:
         # ambil data DetailResult dari database yang tanggalnya sama dengan start_date
-        detail_results = DetailResult.objects.filter(
+        latest_detail_results = DetailResult.objects.filter(
             date_occ=start_date
         )
         
         # ambil data latest_missing_invoices_in_vendor dari database yang tanggalnya sama dengan start_date
-        missing_invoices_in_vendor = MissingInvoiceInVendor.objects.filter(
+        latest_missing_invoices_in_vendor = MissingInvoiceInVendor.objects.filter(
             date=start_date
         )
         
         # ambil data latest_missing_invoices_in_occ dari database yang tanggalnya sama dengan start_date
-        missing_invoices_in_occ = MissingInvoiceInOcc.objects.filter(
+        latest_missing_invoices_in_occ = MissingInvoiceInOcc.objects.filter(
             date=start_date
         )
     else:
@@ -83,6 +83,7 @@ def index(request):
         return response
     else:  
         context = {
+            'page_title': 'History',
             'latest_result': latest_result,
             'latest_detail_results': latest_detail_results,
             'latest_missing_invoices_in_vendor': latest_missing_invoices_in_vendor,

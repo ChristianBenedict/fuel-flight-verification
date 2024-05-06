@@ -38,7 +38,7 @@
             {% for detail_result in latest_detail_results %}
             <tr>
                 <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ detail_result.invoice_no }}</td>
-                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ detail_result.date_occ }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ detail_result.date_occ|date:"Y-m-d" }}</td>
                 <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ detail_result.flight_occ }}</td>
                 <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ detail_result.departure_occ }}</td>
                 <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ detail_result.arrival_occ }}</td>
@@ -70,7 +70,7 @@
             {% for missing_invoices_in_vendor  in latest_missing_invoices_in_vendor %}
             <tr>
                 <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.invoice_no }}</td>
-                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.date|date:"Y/m/d" }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.date|date:"Y-m-d" }}</td>
                 <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.flight }}</td>
                 <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.departure }}</td>
                 <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.arrival }}</td>

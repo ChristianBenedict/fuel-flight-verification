@@ -71,7 +71,7 @@
                           <p>{{ detail_result.invoice_no }}</p>
                       </td>
                       <td class="p-3 hidden sm:table-cell">
-                          <p>{{ detail_result.date_occ }}</p>
+                          <p>{{ detail_result.date_occ|date:"Y-m-d" }}</p>
                       </td>
                       <td class="p-3 hidden sm:table-cell">
                           <p class="dark:text-gray-600">{{ detail_result.flight_occ }}</p>
@@ -142,7 +142,7 @@
                                 <p>{{ missing_invoices_in_vendor.invoice_no }}</p>
                             </td>
                             <td class="p-3 hidden sm:table-cell">
-                                <p>{{ missing_invoices_in_vendor.date|date:"Y/m/d" }}</p>
+                                <p>{{ missing_invoices_in_vendor.date|date:"Y-m-d" }}</p>
                             </td>
                             
                             <td class="p-3 hidden sm:table-cell">
