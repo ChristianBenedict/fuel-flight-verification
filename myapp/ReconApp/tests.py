@@ -202,3 +202,67 @@ def index(request):
 
 
 
+
+
+def result(request):
+    try:
+        # Mengambil entri terbaru dari model Result
+        latest_result = Result.objects.latest('time_of_event')
+        # Mengambil detail result yang terkait dengan entri terbaru dari Result
+        latest_detail_results = latest_result.detail_results.all()
+        
+        try:
+            latest_missing_invoices_in_vendor = latest_result.missing_invoices_in_vendor.all()
+        except Exception as vendor_error:
+            latest_missing_invoices_in_vendor = None    
+        
+        # buat total_missing_invoices_in_vendor
+        total_missing_invoices_in_vendor = 0
+        if latest_missing_invoices_in_vendor:
+            for item in latest_missing_invoices_in_vendor:
+                total_missing_invoices_in_vendor += item.uplift_in_lts
+        
+        total_missing_invoices_in_occ = 0
+        try:
+            latest_missing_invoices_in_occ = latest_result.missing_invoices_in_occ.all()
+            # total_missing_invoices_in_occ
+            if latest_missing_invoices_in_occ:
+                for item in latest_missing_invoices_in_occ:
+                    total_missing_invoices_in_occ += item.uplift_in_lts
+        except Exception as occ_error:
+            latest_missing_invoices_in_occ = None
+
+        if request.method == "POST" and 'export_pdf' in request.POST:  
+            template_path = 'topdf.html' 
+            context = {
+                'latest_result': latest_result,
+                'latest_detail_results': latest_detail_results,
+                'latest_missing_invoices_in_vendor': latest_missing_invoices_in_vendor,
+                'latest_missing_invoices_in_occ': latest_missing_invoices_in_occ,
+                'total_missing_invoices_in_vendor': total_missing_invoices_in_vendor,
+                'total_missing_invoices_in_occ': total_missing_invoices_in_occ,
+            }
+            # Render template
+            html_string = render_to_string(template_path, context)
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="data_export.pdf"'
+            # Create PDF
+            pisa_status = pisa.CreatePDF(html_string, dest=response)
+            if pisa_status.err:
+                return HttpResponse('Terjadi kesalahan saat membuat PDF: %s' % pisa_status.err)
+            return response
+        else:  
+            context = {
+                'latest_result': latest_result,
+                'latest_detail_results': latest_detail_results,
+                'latest_missing_invoices_in_vendor': latest_missing_invoices_in_vendor,
+                'latest_missing_invoices_in_occ': latest_missing_invoices_in_occ,
+                'total_missing_invoices_in_vendor': total_missing_invoices_in_vendor,
+                'total_missing_invoices_in_occ': total_missing_invoices_in_occ,
+            }
+        
+        return render(request, 'result.html', context)
+    
+    except Exception as error:
+        # Tangani kesalahan secara umum
+        return HttpResponse(f'Terjadi kesalahan: {error}')

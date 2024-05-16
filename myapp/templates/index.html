@@ -5,6 +5,8 @@
 {% block content %}
 
 <main class="">
+    {% include 'error/add_data.html' %}
+
     <div class="px-4 py-10 sm:px-6 lg:px-8 lg:py-4">
         <div class="container mx-auto ">
             <div class="border-gray-200">
@@ -162,6 +164,13 @@ uploadButton.addEventListener('click', function() {
         spinner.classList.add('hidden');
         uploadText.textContent = 'Upload';
     }, 2000); // Menggunakan setTimeout untuk simulasi upload selama 2 detik
+});
+
+const modal = document.querySelector('.modal-error');
+const closeBtn = document.querySelector('.close-btn-error');
+
+closeBtn.addEventListener('click', function() {
+  modal.classList.add('hidden');
 });
 
 </script>

@@ -1,12 +1,16 @@
 
 from django.contrib import admin
 from django.urls import path, include
-from myapp.views import index, login, result
+from myapp.views import index, login,logout
+from ReconApp.views import result
+
+handler404 = 'myapp.views.handler404'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("__reload__/", include("django_browser_reload.urls")),
-    path('login/', login, name='index'),
+    path('login/', login, name='login'),
+    path('logout/', logout, name='logout'),
     path('', index, name='index'),
     path('result/', result, name='result'),
     path('occ/', include('OCCApp.urls', namespace='OCCApp')),

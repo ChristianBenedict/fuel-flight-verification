@@ -20,7 +20,7 @@
 <!-- Menggunakan utilitas grid -->
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
   <div class=" pt-3 sm:flex sm:items-center sm:justify-between">
-    <h3 class="text-base font-semibold leading-6 text-gray-900">Rekonsiliasi Tagihan</h3>
+    <h3 class="text-base font-semibold leading-6 text-gray-900">Hasil Rekonsiliasi:</h3>
     <div class="mt-3 flex sm:ml-4 sm:mt-0">
       <div x-data="{ showFilter: false }" class="flex justify-end ">
         <!-- Tombol untuk membuka modal -->
@@ -35,42 +35,62 @@
         x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
         x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         x-description="Modal panel, show/hide based on modal state."
-        class="fixed top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 z-50"
+        class="fixed top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 overflow-hidden  px-4 pb-4 pt-5 text-left  transition-all sm:my-8 sm:w-full max-w-3xl mx-auto sm:p-6 z-50"
         @click.away="showFilter = false">
         <form id="filter-form"
             method="get"
             action="{% url 'ReconApp:index' %}">
-            <div class="border">
-                <div
-                    class="flex justify-between items-center px-6 py-4 bg-gray-200">
-                    <h2
-                        class="text-lg font-semibold text-gray-800">Filter
-                        Data</h2>
-                    <button
-                        type="submit"
-                        class="px-4 py-2 bg-red-500 text-white font-semibold rounded hover:bg-red-600 focus:outline-none focus:bg-red-600">Terapkan</button>
+            <div class="max-w-3xl mx-auto bg-white p-8 rounded-md shadow-md border">
+                <h1 class="text-2xl font-bold mb-6">Filter Data</h1>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="flex flex-col">
+                        <label for="start-date"
+                            class="mb-2 font-semibold text-gray-700">Start
+                            date</label>
+                        <div class="relative">
+                            <input
+                                type="date"
+                                id="start_date"
+                                name="start_date"
+                                class="block w-full bg-gray-200 text-gray-800 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+                    <div class="flex flex-col">
+                        <label for="end-date"
+                            class="mb-2 font-semibold text-gray-700">End
+                            date</label>
+                        <div class="relative">
+                            <input
+                                type="date"
+                                id="end_date"
+                                name="end_date"
+                                class="block w-full bg-gray-200 text-gray-800 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+                    <div class="flex flex-col ">
+                        <label for="fuel_agent"
+                            class="mb-2 font-semibold text-gray-700">Fuel
+                            agent</label>
+                        <select id="fuel_agent"name="fuel_agent"
+                            class="border border-gray-300 rounded-md p-2 bg-gray-200 hover:bg-white">
+                            <option value=""> Fuel Agent </option>
+                            <option value="Pertamina">Pertamina</option>
+                            <option value="Petronas Dagangan">Petronas Dagangan</option>
+                            <option value="PTTOR">PTTOR</option>
+                            <option value="BAFS">BAFS</option>
+                            <option value="Petronas Dagangan Berhad">Petronas Dagangan Berhad</option>
+                            <option value="Shell">Shell</option>
+                            <option value="Petron">Petron</option>
+                            <option value="AIRBP">AIRBP</option>
+                            <option value="PTT Public Co. Ltd">PTT Public Co. Ltd</option>
+                            <option value="Singapore Petroleum Company Limited">Singapore Petroleum Company Limited</option>
+                            <option value="Shell Malaysia Trading">Shell Malaysia Trading</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="p-6">
-                    <div class="mb-4">
-                        <label
-                            class="block text-gray-700 text-sm font-bold mb-2">Dari
-                            Tanggal</label>
-                        <input
-                            type="date"
-                            id="start_date"
-                            name="start_date"
-                            class="block w-full bg-gray-200 text-gray-800 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500">
-                    </div>
-                    <div class="mb-4">
-                        <label
-                            class="block text-gray-700 text-sm font-bold mb-2">Hingga
-                            Tanggal</label>
-                        <input
-                            type="date"
-                            id="end_date"
-                            name="end_date"
-                            class="block w-full bg-gray-200 text-gray-800 border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-blue-500">
-                    </div>
+                <div class="mt-5 text-right">
+                    <button type="submit"
+                        class="inline-flex items-center rounded-md bg-red-600 px-3 py-2.5 text-sm font-semibold text-white shadow-sm ring-1 ring-inset hover:bg-red-500">Terapkan</button>
                 </div>
             </div>
         </form>
@@ -86,39 +106,48 @@
 
 
   {% if Start_date and End_date %}
-  <p class="text-sm">Rekonsiliasi Data Tagihan Fuel IAA dengan Fuel Agent <span class="text-red-600">{{ Start_date|date:" N j, Y"   }}</span>  sampai <span class="text-red-600">{{ End_date|date:" N j, Y"  }}</span>  </p>
-
+  <p class="text-sm">Rekonsiliasi Data Tagihan Fuel IAA dengan Fuel Agent <span class="text-red-600">{{ Start_date  }}</span>  sampai <span class="text-red-600">{{ End_date  }}</span>  </p>
   {% elif Start_date and not End_date %}
-  <p class="text-sm">Rekonsiliasi Data Tagihan Fuel IAA dengan Fuel Agent mulai dari <span class="text-red-600">{{ Start_date|date:" N j, Y"   }}</span>   </p>
+  <p class="text-sm">Rekonsiliasi Data Tagihan Fuel IAA dengan Fuel Agent mulai dari <span class="text-red-600">{{ Start_date   }}</span>   </p>
 
   {% elif not Start_date and End_date %}
-  <p class="text-sm">Rekonsiliasi Data Tagihan Fuel IAA dengan Fuel Agent sampai tanggal <span class="text-red-600">{{ End_date|date:" N j, Y"   }}</span>   </p>
+  <p class="text-sm">Rekonsiliasi Data Tagihan Fuel IAA dengan Fuel Agent sampai tanggal <span class="text-red-600">{{ End_date   }}</span>   </p>
   {% else %}
   <p class="text-sm">Rekonsiliasi Data Tagihan Fuel IAA dengan Fuel Agent </p>
   {% endif %}
-
 
     <div class="py-5">
       <dl class="grid grid-cols-1 gap-5 sm:grid-cols-3  mb-2">
         <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt class="truncate text-sm font-medium text-gray-500">Total Uplift in Lts by IAA</dt>
+          {% if total_uplift_in_lts_by_iaa %}
+          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_uplift_in_lts_by_iaa|floatformat:"-0"|intcomma }}</dd>
+            {% else %}
           <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ latest_result.total_uplift_in_lts_occ|floatformat:"-0"|intcomma }}</dd>
+            {% endif %}
         </div>
         <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt class="truncate text-sm font-medium text-gray-500">Total Uplift in Lts by Vendor</dt>
-          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ latest_result.total_uplift_in_lts_ven|floatformat:"-0"|intcomma }}</dd>
+          {% if total_uplift_in_lts_by_vendor %}
+          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_uplift_in_lts_by_vendor|floatformat:"-0"|intcomma }}</dd>
+            {% else %}
+            <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ latest_result.total_uplift_in_lts_ven|floatformat:"-0"|intcomma }}</dd>
+            {% endif %}
         </div>
         <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
           <dt class="truncate text-sm font-medium text-gray-500">Total Selisih</dt>
-          <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ latest_result.total_selisih|floatformat:"-0"|intcomma }}</dd>
+          {% if total_selisih_fuel %}
+            <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ total_selisih_fuel }}</dd>
+            {% else %}
+                <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ latest_result.total_selisih|floatformat:"-0"|intcomma }}</dd>
+            {% endif %}
         </div>
       </dl>
       </div>
-
 </div>
-
-
 <div class="container p-2 mx-auto sm:p-4 ">
+    {% if latest_detail_results %}
+    <p class="text-sm font-semibold leading-6 text-gray-600 pb-2"> <span class="text-red-600">**</span> Daftar Tagihan pembelian Fuel dari vendor yang tidak sesuai dengan rekaman IAA</p>
 	<div class="overflow-x-auto">
     <table class="min-w-full text-xs">
       <colgroup>
@@ -137,9 +166,9 @@
               <th class="hidden sm:table-cell p-3">Dep</th>
               <th class="hidden sm:table-cell p-3 ">Arr</th>
               <th class="hidden sm:table-cell p-3 ">Reg</th>
-              <th class="hidden sm:table-cell p-3 ">Fuel Agent Name</th>
-              <th class="p-3 ">Uplift In Lts By IAA</th>
-              <th class="p-3 ">Uplift In Lts By Fuel Agent</th>
+              <th class="hidden sm:table-cell py-3 ">Fuel Agent Name</th>
+              <th class="py-3 ">Uplift In Lts By IAA</th>
+              <th class="py-3 ">Uplift In Lts By Fuel Agent</th>
               <th class="pr-3">Selisih</th>
           </tr>
       </thead>
@@ -164,17 +193,17 @@
             <td class="p-3  hidden sm:table-cell">
                 <p>{{ detail_result.registration_occ }}</p>
             </td>
-            <td class="p-3  hidden sm:table-cell">
+            <td class="py-3 text-center hidden sm:table-cell">
                 <p>{{ detail_result.fuel_agent }}</p>
             </td>
-            <td class="p-3 text-center">
-                <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-green-200">{{ detail_result.uplift_in_lts_occ}}</span>
+            <td class="py-3 text-center">
+                <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-green-200">{{ detail_result.uplift_in_lts_occ|floatformat:"-0"|intcomma}}</span>
             </td>
-            <td class="p-3 text-center">
-                <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-green-200">{{ detail_result.uplift_in_lts_ven }}</span>
+            <td class="py-3 text-center">
+                <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-green-200">{{ detail_result.uplift_in_lts_ven|floatformat:"-0"|intcomma }}</span>
             </td>
             
-            <td class="p-3 ">
+            <td class="py-3 ">
                 <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-red-200">{{ detail_result.selisih|floatformat:"-0"|intcomma }}</span>
             </td>
         </tr>
@@ -182,12 +211,13 @@
           </tbody>
   </table>
 	</div>
+    {% endif %}
 </div>
 
 
-
+{% if latest_missing_invoices_in_vendor %}
 <div class="container p-2 mt-4 mb-4 mx-auto sm:p-4 dark:text-gray-800">
-	<p class="text-sm font-semibold leading-6 text-gray-600 pb-2">Data dari Vendor Tidak Ditemukan dalam Rekaman IAA</p>
+	<p class="text-sm font-semibold leading-6 text-gray-600 pb-2"><span class="text-red-600">**</span>Tagihan dari Vendor Yang Tidak Ditemukan dalam Rekaman IAA</p>
 	<div class="overflow-x-auto">
     <table class="min-w-full text-xs">
       <colgroup>
@@ -243,8 +273,78 @@
       </tbody>
     </table>
 <div class="flex justify-end mr-40 mt-5 ">
-  <h1 class=" font-bold">Total : <span>{{ total_missing_invoices_in_vendor|intcomma }}</span></h1>
+    {% if total_missing_invoices_in_vendor %}
+    <h1 class=" font-bold">Total : <span>{{ total_missing_invoices_in_vendor|intcomma }}</span></h1>
+    {% endif %}
 </div>
 	</div>
 </div>
+{% endif %}
+
+
+{% if latest_missing_invoices_in_occ %}
+<div class="container p-2 mt-4 mb-4 mx-auto sm:p-4 dark:text-gray-800">
+	<p class="text-sm font-semibold leading-6 text-gray-600 pb-2"><span class="text-red-600">**</span>Data Yang Terdapat Pada Rekaman IAA Tetapi Tidak Ditemukan Dalam Tagiahn Vendor</p>
+	<div class="overflow-x-auto">
+    <table class="min-w-full text-xs">
+      <colgroup>
+          <col>
+          <col>
+          <col>
+          <col>
+          <col>
+          <col class="w-24">
+      </colgroup>
+      <thead class="dark:bg-gray-300 ">
+          <tr class="text-left">
+              <th class="p-3">Invoice #</th>
+              <th class="hidden sm:table-cell p-3">Date</th>
+              <th class="hidden sm:table-cell p-3">Flight</th>
+              <th class="hidden sm:table-cell p-3">Dep</th>
+              <th class="hidden sm:table-cell p-3 ">Arr</th>
+              <th class="hidden sm:table-cell p-3 ">Reg</th>
+              <th class="hidden sm:table-cell p-3 ">Fuel Agent Name</th>
+              <th class="p-3 ">Uplift In Lts By IAA</th>
+          </tr>
+      </thead>
+      <tbody>
+        {% for missing_invoices_in_occ  in latest_missing_invoices_in_occ %}
+          <tr class="border-b border-opacity-20 dark:border-gray-300 dark:bg-gray-50">
+              <td class="p-3">
+                  <p>{{ missing_invoices_in_occ.invoice_no }}</p>
+              </td>
+              <td class="p-3 hidden sm:table-cell">
+                  <p>{{ missing_invoices_in_occ.date|date:"M. d, Y" }}</p>
+              </td>
+            
+              <td class="p-3 hidden sm:table-cell">
+                  <p class="dark:text-gray-600">{{ missing_invoices_in_occ.flight }}</p>
+              </td>
+              <td class="p-3 hidden sm:table-cell">
+                  <p class="dark:text-gray-600">{{ missing_invoices_in_occ.departure }}</p>
+              </td>
+              <td class="p-3  hidden sm:table-cell">
+                  <p>{{ missing_invoices_in_occ.arrival }}</p>
+              </td>
+              <td class="p-3  hidden sm:table-cell">
+                  <p>{{ missing_invoices_in_occ.registration }}</p>
+              </td>
+              <td class="p-3  hidden sm:table-cell">
+                  <p>{{ missing_invoices_in_occ.fuel_agent }}</p>
+              </td>
+              <td class="p-3">
+                  <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-red-200">{{ missing_invoices_in_occ.uplift_in_lts|floatformat:"-0"|intcomma }}</span>
+              </td>
+          </tr>
+          {% endfor %}
+      </tbody>
+    </table>
+<div class="flex justify-end mr-40 mt-5 ">
+    {% if total_missing_invoices_in_occ %}
+    <h1 class=" font-bold">Total : <span>{{ total_missing_invoices_in_occ|intcomma }}</span></h1>
+    {% endif %}
+</div>
+	</div>
+</div>
+{% endif %}
 {% endblock content %}

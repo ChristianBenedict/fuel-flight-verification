@@ -4,6 +4,7 @@
 {% load humanize %}
 
 {% block content %}
+
 <div>
     <div class="mx-auto max-w-7xl mt-8 px-4 sm:px-6 lg:px-8">
         <div class="sm:flex sm:items-center">
@@ -20,7 +21,6 @@
                 </form>
             </div>
         </div>
-
         <div class="py-5">
             <dl class="grid grid-cols-1 gap-5 sm:grid-cols-3  mb-2">
               <div class="overflow-hidden rounded-lg bg-white px-4 py-5 shadow sm:p-6">
@@ -36,10 +36,11 @@
                 <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{ latest_result.total_selisih|floatformat:"-0"|intcomma }}</dd>
               </div>
             </dl>
-            </div>
-
+        </div>
     </div>
+    {% if latest_detail_results %}
     <div class="container p-2 mx-auto sm:p-4 ">
+        <p class="text-sm font-semibold leading-6 text-gray-600 pb-2"> <span class="text-red-600">**</span> Daftar Tagihan pembelian Fuel dari vendor yang tidak sesuai dengan rekaman IAA</p>
         <div class="overflow-x-auto">
             <table class="min-w-full text-xs">
                 <colgroup>
@@ -89,10 +90,10 @@
                           <p>{{ detail_result.fuel_agent }}</p>
                       </td>
                       <td class="p-3 text-center">
-                          <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-green-200">{{ detail_result.uplift_in_lts_occ}}</span>
+                          <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-green-200">{{ detail_result.uplift_in_lts_occ|floatformat:"-0"|intcomma}}</span>
                       </td>
                       <td class="p-3 text-center">
-                          <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-green-200">{{ detail_result.uplift_in_lts_ven }}</span>
+                          <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-green-200">{{ detail_result.uplift_in_lts_ven|floatformat:"-0"|intcomma }}</span>
                       </td>
                       
                       <td class="p-3 ">
@@ -104,8 +105,20 @@
             </table>
         </div>
     </div>
+    {% else %}
+    <div class="flex justify-center items-center h-screen border -mt-10">
+        <div class=" bg-white p-8 rounded-lg border">
+            <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+            <h2 class="text-xl mt-4 font-semibold text-gray-800 text-center mb-2">Tidak Ada Perbedaan yang Ditemukan</h2>
+        </div>
+    </div>
+    {% endif %}
 
-
+{% if latest_missing_invoices_in_vendor %}
     <div class="flow-root overflow-hidden  mt-20 mb-10">
         <div class="sm:flex sm:items-center">
           <div class="sm:flex-auto">
@@ -174,8 +187,80 @@
           
         </div>
     </div>
+{% endif %}
       
-    
+
+{% if latest_missing_invoices_in_occ %}
+    <div class="flow-root overflow-hidden  mt-20 mb-10">
+        <div class="sm:flex sm:items-center">
+          <div class="sm:flex-auto">
+            <p class="px-6 mt-2 text-sm text-gray-700"><span class=" text-red-600 text-xl">**</span>Data dari {{ latest_result.fuel_agent }} Tidak Ditemukan dalam Rekaman IAA.</p>
+          </div>
+        </div>
+        <div class=" container p-2 mx-auto sm:p-4 ">
+            <div class="overflow-x-auto ">
+                <table class="min-w-full text-xs">
+                    <colgroup>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                        <col>
+                        <col class="w-24">
+                    </colgroup>
+                    <thead class="dark:bg-gray-300 ">
+                        <tr class="text-left">
+                            <th class="p-3">Invoice #</th>
+                            <th class="hidden sm:table-cell p-3">Date</th>
+                            <th class="hidden sm:table-cell p-3">Flight</th>
+                            <th class="hidden sm:table-cell p-3">Dep</th>
+                            <th class="hidden sm:table-cell p-3 ">Arr</th>
+                            <th class="hidden sm:table-cell p-3 ">Reg</th>
+                            <th class="hidden sm:table-cell p-3 ">Fuel Agent Name</th>
+                            <th class="p-3 ">Uplift In Lts By IAA</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      {% for latest_missing_invoices_in_occ  in latest_missing_invoices_in_occ %}
+                        <tr class="border-b border-opacity-20 dark:border-gray-300 dark:bg-gray-50">
+                            <td class="p-3">
+                                <p>{{ latest_missing_invoices_in_occ.invoice_no }}</p>
+                            </td>
+                            <td class="p-3 hidden sm:table-cell">
+                                <p>{{ latest_missing_invoices_in_occ.date|date:"Y-m-d" }}</p>
+                            </td>
+                            
+                            <td class="p-3 hidden sm:table-cell">
+                                <p class="dark:text-gray-600">{{ latest_missing_invoices_in_occ.flight }}</p>
+                            </td>
+                            <td class="p-3 hidden sm:table-cell">
+                                <p class="dark:text-gray-600">{{ latest_missing_invoices_in_occ.departure }}</p>
+                            </td>
+                            <td class="p-3  hidden sm:table-cell">
+                                <p>{{ latest_missing_invoices_in_occ.arrival }}</p>
+                            </td>
+                            <td class="p-3  hidden sm:table-cell">
+                                <p>{{ latest_missing_invoices_in_occ.registration }}</p>
+                            </td>
+                            <td class="p-3  hidden sm:table-cell">
+                                <p>{{ latest_missing_invoices_in_occ.fuel_agent }}</p>
+                            </td>
+                            <td class="p-3">
+                                <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-red-200">{{ latest_missing_invoices_in_occ.uplift_in_lts|floatformat:"-0"|intcomma }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                  </table>
+            <div class="flex justify-end mr-40 mt-5 ">
+                <h1 class=" font-bold">Total : <span>{{ total_missing_invoices_in_occ|intcomma }}</span></h1>
+            </div>
+            </div>
+          
+        </div>
+    </div>
+{% endif %}
+
     
 </div>
 

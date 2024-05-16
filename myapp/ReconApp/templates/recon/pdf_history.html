@@ -10,13 +10,25 @@
     <h1 style="color: #252525;font-size: 20px;margin-bottom: 10px; " >Hasil rekonsiliasi data pembelian minyak </h1>
     <div style="display: flex; flex-direction: column; ">
         <div class="total">
+            {% if total_uplift_in_lts_by_iaa %}
+            <p style="color: #252525; font-size: 12px; text-align: left; font-weight:bold;">Total Uplift in Lts by IAA: {{ total_uplift_in_lts_by_iaa|floatformat:"-0"|intcomma }} </p>
+            {% else %}
             <p style="color: #252525; font-size: 12px; text-align: left; font-weight:bold;">Total Uplift in Lts by IAA: {{ latest_result.total_uplift_in_lts_occ|floatformat:"-0"|intcomma }} </p>
+            {% endif %}
         </div>
         <div class="total">
+            {% if total_uplift_in_lts_by_vendor %}
+            <p style="color: #252525; font-size: 12px; text-align: left; font-weight:bold;">Total Uplift in Lts by Pertamina: {{ total_uplift_in_lts_by_vendor|floatformat:"-0"|intcomma }}</p>
+            {% else %}
             <p style="color: #252525; font-size: 12px; text-align: left; font-weight:bold;">Total Uplift in Lts by Pertamina: {{ latest_result.total_uplift_in_lts_ven|floatformat:"-0"|intcomma }}</p>
+            {% endif %}
         </div>
         <div class="total">
+            {% if total_selisih_fuel %}
+            <p style="color: #252525; font-size: 12px; text-align: left; font-weight:bold;">Total Selisih: {{ total_selisih_fuel|floatformat:"-0"|intcomma }}</p>
+            {% else %}
             <p style="color: #252525; font-size: 12px; text-align: left; border-bottom: 1px solid #837f7f; font-weight:bold;">Total Selisih: {{ latest_result.total_selisih|floatformat:"-0"|intcomma }}</p>
+            {% endif %}
         </div>
     </div>
     <table style="width: 100%;border-collapse: collapse;margin-top: 50px; margin-bottom: 40px;">
@@ -51,8 +63,8 @@
             {% endfor %}
         </tbody>
     </table>
-
-    <p class="invoice" style="color:black;font-size:12px;"><span style="color: rgb(233, 48, 48);">***</span>Data dari {{ latest_result.fuel_agent }} Tidak Ditemukan dalam Rekaman IAA.</p>
+    {% if latest_missing_invoices_in_vendor %}
+    <p class="invoice" style="color:black;font-size:12px;"><span style="color: rgb(233, 48, 48);">***</span>Tagihan dari Vendor Yang Tidak Ditemukan dalam Rekaman IAA</p>
     <table>
         <thead>
             <tr>
@@ -81,8 +93,52 @@
             {% endfor %}
         </tbody>
     </table>
+    {% endif %}
+    {% if  total_missing_invoices_in_vendor %}
     <div style="color: #252525;margin-top: 30px;margin-bottom: 20px;text-align: right;float: right;font-weight: 600;font-size: large;">
+        {% if total_missing_invoices_in_vendor %}
         <dt class="">Total Uplift in Lts : {{ total_missing_invoices_in_vendor|intcomma }}</dt>
+        {% endif %}
     </div>
+    {% endif %}
+
+    {% if latest_missing_invoices_in_occ %}
+    <p class="invoice" style="color:black;font-size:12px;"><span style="color: rgb(233, 48, 48);">***</span>Tagihan dari Vendor Yang Tidak Ditemukan dalam Rekaman IAA</p>
+    <table>
+        <thead>
+            <tr>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Invoice</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Date</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Flight</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Dep</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Arr</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Reg</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Vendor Name</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Uplift in Lts</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for total_missing_invoices_in_occ  in latest_missing_invoices_in_occ %}
+            <tr>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ total_missing_invoices_in_occ.invoice_no }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ total_missing_invoices_in_occ.date|date:"Y-m-d" }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ total_missing_invoices_in_occ.flight }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ total_missing_invoices_in_occ.departure }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ total_missing_invoices_in_occ.arrival }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ total_missing_invoices_in_occ.registration }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ total_missing_invoices_in_occ.fuel_agent }}</td>
+                <td style="border: 1px solid #dddddd;text-align: center;padding: 4px;">{{ total_missing_invoices_in_occ.uplift_in_lts|floatformat:"-0"|intcomma }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    {% if  total_missing_invoices_in_occ %}
+    <div style="color: #252525;margin-top: 30px;margin-bottom: 20px;text-align: right;float: right;font-weight: 600;font-size: large;">
+        {% if total_missing_invoices_in_occ %}
+        <dt class="">Total Uplift in Lts : {{ total_missing_invoices_in_occ|intcomma }}</dt>
+        {% endif %}
+    </div>
+    {% endif %}
 </body>
 </html>

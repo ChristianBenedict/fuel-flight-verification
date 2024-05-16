@@ -16,6 +16,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -23,7 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-c=gs4a*a6zwy*mynuu(*4c$gk$b-s*&m@)nx=7pi#0@!pwnffi'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = True
+# DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -43,7 +46,7 @@ INSTALLED_APPS = [
     'django_browser_reload',
     'OCCApp',
     'VendorApp',
-    'ReconApp',  
+    'ReconApp', 
 ]
 
 TAILWIND_APP_NAME = 'theme'
@@ -145,3 +148,5 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
