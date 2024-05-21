@@ -52,6 +52,7 @@
         </tbody>
     </table>
 
+    {% if latest_missing_invoices_in_vendor %}
     <p class="invoice" style="color:black;font-size:12px;"><span style="color: rgb(233, 48, 48);">***</span>Data dari {{ latest_result.fuel_agent }} Tidak Ditemukan dalam Rekaman IAA.</p>
     <table>
         <thead>
@@ -67,16 +68,16 @@
             </tr>
         </thead>
         <tbody>
-            {% for missing_invoices_in_vendor  in latest_missing_invoices_in_vendor %}
+            {% for missing  in latest_missing_invoices_in_vendor %}
             <tr>
-                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.invoice_no }}</td>
-                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.date|date:"Y-m-d" }}</td>
-                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.flight }}</td>
-                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.departure }}</td>
-                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.arrival }}</td>
-                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.registration }}</td>
-                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing_invoices_in_vendor.fuel_agent }}</td>
-                <td style="border: 1px solid #dddddd;text-align: center;padding: 4px;">{{ missing_invoices_in_vendor.uplift_in_lts|floatformat:"-0"|intcomma }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing.invoice_no }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing.date|date:"Y-m-d" }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing.flight }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing.departure }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing.arrival }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing.registration }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing.fuel_agent }}</td>
+                <td style="border: 1px solid #dddddd;text-align: center;padding: 4px;">{{ missing.uplift_in_lts|floatformat:"-0"|intcomma }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -84,5 +85,43 @@
     <div style="color: #252525;margin-top: 30px;margin-bottom: 20px;text-align: right;float: right;font-weight: 600;font-size: large;">
         <dt class="">Total Uplift in Lts : {{ total_missing_invoices_in_vendor|intcomma }}</dt>
     </div>
+    {% endif %}
+
+
+
+    {% if latest_missing_invoices_in_occ %}
+    <p class="px-6 mt-2 text-sm text-gray-700"><span style="color: rgb(233, 48, 48);">***</span>Data dalam rekaman IAA tidak terdapat pada tagiahan {{ latest_result.fuel_agent }} </p>
+    <table>
+        <thead>
+            <tr>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Invoice</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Date</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Flight</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Dep</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Arr</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Reg</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Vendor Name</th>
+                <th style="border: 1px solid #dddddd;text-align: left;padding: 4px;background-color: #f2f2f2;">Uplift in Lts</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for missing  in latest_missing_invoices_in_occ %}
+            <tr>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing.invoice_no }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing.date|date:"Y-m-d" }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing.flight }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing.departure }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing.arrival }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing.registration }}</td>
+                <td style="border: 1px solid #dddddd;text-align: left;padding: 4px;">{{ missing.fuel_agent }}</td>
+                <td style="border: 1px solid #dddddd;text-align: center;padding: 4px;">{{ missing.uplift_in_lts|floatformat:"-0"|intcomma }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div style="color: #252525;margin-top: 30px;margin-bottom: 20px;text-align: right;float: right;font-weight: 600;font-size: large;">
+        <dt class="">Total Uplift in Lts : {{ total_missing_invoices_in_occ|intcomma }}</dt>
+    </div>
+    {% endif %}
 </body>
 </html>

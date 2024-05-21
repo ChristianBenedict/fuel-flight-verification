@@ -1,0 +1,130 @@
+
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+
+<!--Regular Datatables CSS-->
+<link href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"
+    rel="stylesheet">
+
+    <style>
+
+        /* Menambahkan margin-bottom pada elemen yang berisi input search */
+        .dataTables_filter {
+            margin-bottom: 20px;
+            /* Ubah nilai ini sesuai kebutuhan Anda */
+        }
+        
+        /* Menambahkan margin-bottom pada elemen yang berisi dropdown "Show entries" */
+        .dataTables_length {
+            margin-bottom: 20px;
+            /* Ubah nilai ini sesuai kebutuhan Anda */
+        }
+        
+        /* Membuat input field menjadi rounded */
+        .dataTables_filter input {
+            border-radius: 5px;
+            /* Ubah nilai ini sesuai kebutuhan Anda */
+            border: 1px solid #ccc;
+            /* Tambahkan border jika diperlukan */
+        }
+
+        /* id example_length*/
+        #example_length select {
+            border-radius: 5px;
+            /* Ubah nilai ini sesuai kebutuhan Anda */
+            border: 1px solid #ccc;
+
+        }
+
+        
+        </style>
+<!--Responsive Extension Datatables CSS-->
+
+<div class=" text-gray-900 tracking-wider leading-normal text-sm">
+    <!--Container-->
+    <div class=" mx-auto px-2 mt-10">
+        <!-- bagian 1 -->
+        <div class="flex-1 mx-8">
+            <ul role="list"
+                class="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+                <li class="col-span-1 flex rounded-md shadow-sm">
+                    <div
+                        class="flex flex-1 items-center justify-between  rounded border border-gray-400 bg-white">
+                        <div class="flex-1 truncate px-4 py-2 text-sm">
+                            <a href="#"
+                                class="font-medium text-gray-900 hover:text-gray-600">Totals
+                                Uplift in Lts :</a>
+                            <p
+                                class="font-semibold text-gray-900">{{total_uplift_in_lts|floatformat:0|intcomma }}</p>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <!--Card-->
+        <div id='recipients' class="p-8 mt-6 lg:mt-0 rounded ">
+            <table id="example"
+                class="stripe hover mt-10 ring-1 ring-gray-300  sm:rounded-lg"
+                style="width:100%; padding-top: 1em;  padding-bottom: 1em;">
+                <thead>
+                    <tr>
+                        <th data-priority="1">Date</th>
+                        <th data-priority="2">Flight</th>
+                        <th data-priority="3">Dep</th>
+                        <th data-priority="4">Arr</th>
+                        <th data-priority="5">Reg</th>
+                        <th data-priority="6">Uplift in Lts</th>
+                        <th data-priority="7">Fuel Agent</th>
+                        <th data-priority="8">Invoice</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vendor in fuel_vendors %}
+                    <tr>
+                        <td  class="text-center">{{ vendor.Date }}</td>
+                        <td  class="text-center">{{ vendor.Flight }}</td>
+                        <td  class="text-center">{{ vendor.Dep }}</td>
+                        <td  class="text-center">{{ vendor.Arr }}</td>
+                        <td  class="text-center">{{ vendor.Reg }}</td>
+                        <td  class="text-center">{{ vendor.Uplift_in_Lts }}</td>
+                        <td  class="text-center">{{ vendor.Vendor }}</td>
+                        <td  class="text-center">{{ vendor.Invoice }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+
+        </div>
+        <!--/Card-->
+
+    </div>
+    <!--/container-->
+
+    <!-- jQuery -->
+    <script type="text/javascript"
+        src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+    <!--Datatables -->
+    <script
+        src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script
+        src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+
+    <script>
+		$(document).ready(function() {
+
+			var table = $('#example').DataTable({
+					responsive: true
+				})
+				.columns.adjust()
+				.responsive.recalc();
+		});
+	</script>
+
+</div>
+
+{% endblock %}

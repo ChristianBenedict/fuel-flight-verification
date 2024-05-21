@@ -2,7 +2,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from myapp.views import index, login,logout
-from ReconApp.views import result
+from ReconApp.views import result, index
 
 handler404 = 'myapp.views.handler404'
 
@@ -13,7 +13,8 @@ urlpatterns = [
     path('logout/', logout, name='logout'),
     path('', index, name='index'),
     path('result/', result, name='result'),
+    path('history/',index, name='history'),
     path('occ/', include('OCCApp.urls', namespace='OCCApp')),
     path('vendor/', include('VendorApp.urls', namespace='VendorApp')),
-    path('recon/', include('ReconApp.urls', namespace='ReconApp')),
+
 ]

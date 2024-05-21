@@ -9,9 +9,9 @@ class FuelVendor(models.Model):
     Uplift_in_Lts = models.FloatField()
     Invoice = models.CharField(max_length=100)
     Vendor= models.CharField(max_length=150)
-    
-    
 
-    def __str__(self):
+    
+    def __str__(self): # berguna untuk menampilkan data di admin
         return f"{self.Date} - {self.Flight} - {self.Reg} - {self.Invoice}- {self.Vendor}"
+
 
