@@ -7,7 +7,7 @@ class FuelVendor(models.Model):
     Arr = models.CharField(max_length=100) 
     Reg = models.CharField(max_length=20)
     Uplift_in_Lts = models.FloatField()
-    Invoice = models.CharField(max_length=100)
+    Invoice = models.CharField(max_length=100, unique=True) 
     Vendor= models.CharField(max_length=150)
 
     

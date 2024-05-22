@@ -119,7 +119,11 @@
                         <td  class="text-center">{{ detail_result.fuel_agent }}</td>
                         <td  class="text-center">{{ detail_result.uplift_in_lts_occ|floatformat:"-0"|intcomma }}</td>
                         <td  class="text-center">{{ detail_result.uplift_in_lts_ven|floatformat:"-0"|intcomma }}</td>
-                        <td  class="text-center">{{ detail_result.selisih|floatformat:"-0"|intcomma }}</td>
+                        <td class="text-center">
+                            <span class="{% if detail_result.selisih < 0 %}bg-red-300 px-2 rounded-sm{% else %}bg-green-300 px-3 rounded-sm{% endif %}">
+                                {{ detail_result.selisih|floatformat:"-0"|intcomma }}
+                            </span>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -186,55 +190,6 @@
 {% endif %}
       
 
-{% if latest_missing_invoices_in_occ %}
-<div class="flow-root overflow-hidden  mt-20 mb-10 text-sm">
-    <div class="sm:flex sm:items-center">
-      <div class="sm:flex-auto">
-        <p class="px-6 text-sm text-gray-700"><span class=" text-red-600 text-xl">**</span>Data dalam rekaman IAA tidak terdapat pada tagiahan {{ latest_result.fuel_agent }} </p>
-      </div>
-    </div>
-    <div class="container p-2 mx-auto sm:p-4 ">
-        <div id="recipients" class="lg:mt-0 rounded ">
-            <table id="example3" class="stripe hover ring-1 ring-gray-300  sm:rounded-lg" style="width:100%; padding-top: 1em;  padding-bottom: 1em;">
-                <thead class="dark:bg-gray-300 ">
-                    <tr >
-                        <th data-priority="1">Invoice #</th>
-                        <th data-priority="2">Date</th>
-                        <th data-priority="3">Flight</th>
-                        <th data-priority="4">Dep</th>
-                        <th data-priority="5">Arr</th>
-                        <th data-priority="6">Reg</th>
-                        <th data-priority="7">Fuel Agent Name</th>
-                        <th data-priority="8">Uplift In Lts By IAA</th>
-                    </tr>
-                </thead>
-                <tbody>
-                  {% for missing  in latest_missing_invoices_in_occ %}
-                    <tr class="border-b border-opacity-20 dark:border-gray-300 dark:bg-gray-50">
-                        <td class="text-center"> {{ missing.invoice_no }} </td>
-                        <td class="text-center">{{ missing.date|date:"Y-m-d" }}</td>
-                        <td class="text-center">{{ missing.flight }}</td>
-                        <td class="text-center">{{ missing.departure }}</td>
-                        <td class="text-center">{{ missing.arrival }}</td>
-                        <td class="text-center">{{ missing.registration }}</td>
-                        <td class="text-center"> {{ missing.fuel_agent }}</td>
-                        <td class="text-center">
-                            <span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-red-200">{{ missing.uplift_in_lts|floatformat:"-0"|intcomma }}</span>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot >
-                    <tr>
-                        <th colspan="7" style="text-align:left; " class=" -mr-20">Total Uplift In Lts By IAA:</th>
-                        <th>{{ total_missing_invoices_in_occ|floatformat:"-0"|intcomma }} lts</th>
-                    </tr>
-                </tfoot>
-              </table>
-        </div>
-    </div>
-</div>
-{% endif %}
 </div>
 
     <!-- jQuery -->
@@ -259,14 +214,6 @@
         $(document).ready(function() {
 
 			var table = $('#example2').DataTable({
-					responsive: true
-				})
-				.columns.adjust()
-				.responsive.recalc();
-		});
-        $(document).ready(function() {
-
-			var table = $('#example3').DataTable({
 					responsive: true
 				})
 				.columns.adjust()

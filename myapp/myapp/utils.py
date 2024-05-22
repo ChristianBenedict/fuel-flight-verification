@@ -116,31 +116,25 @@ def get_data_occ(data_start_date, data_end_date, vendor):
 
     
     
+    
 def change_data_fuel(fuel_occ, fuel_vendor):
+    total_occ = 0
+    total_vendor = 0
+    # Buat set untuk menyimpan invoice dari fuel_vendor
+    vendor_invoices = {vendor.Invoice for vendor in fuel_vendor}
+    # Ubah tipe data Uplift_in_Lts menjadi float dan jumlahkan hanya jika invoice ada di vendor_invoices
     for i in range(len(fuel_occ)):
-        # ubah tipe data Uplift_in_Lts dari string ke float
+        fuel_occ[i]["Invoice"] = fuel_occ[i]["Invoice"].strip()
         fuel_occ[i]["Uplift_in_Lts"] = float(fuel_occ[i]["Uplift_in_Lts"])
-        
-        
-        # ambil total Uplift_in_Lts by occ
-        total_occ = sum(float(item["Uplift_in_Lts"]) for item in fuel_occ)
-        
-        
-        
-        
+        if fuel_occ[i]["Invoice"] in vendor_invoices:
+            total_occ += fuel_occ[i]["Uplift_in_Lts"]
+    # Ubah tipe data Uplift_in_Lts menjadi float dan jumlahkan semua Uplift_in_Lts dari fuel_vendor
     for i in range(len(fuel_vendor)):
-        # ubah tipe data Uplift_in_Lts dari string ke float
+        fuel_vendor[i].Invoice = fuel_vendor[i].Invoice.strip()
         fuel_vendor[i].Uplift_in_Lts = float(fuel_vendor[i].Uplift_in_Lts)
-        
-        # print semua data  Uplift_in_Lts by vendor
-        
-        # ambil total Uplift_in_Lts by vendor
-        total_vendor = sum(item.Uplift_in_Lts for item in fuel_vendor)
-        
+        total_vendor += fuel_vendor[i].Uplift_in_Lts
+
     return total_occ, total_vendor
-    
-        
-    
 
 
 def to_dict(instance): # ini berguna untuk mengubah data dari instance menjadi dictionary
@@ -157,7 +151,7 @@ def to_dict(instance): # ini berguna untuk mengubah data dari instance menjadi d
     
 
 
-def to_dict_occ(data_dict):
+def to_dict_occ(data_dict): # ini berguna untuk mengubah data dari instance menjadi dictionary
     return {
         'Date': data_dict["Date"],
         'Flight': data_dict["Flight"],
@@ -217,16 +211,16 @@ def process_uploaded_file(uploaded_file, request):
                 messages.error(request, f"Format tanggal tidak valid: {date_str}")
             # Update nilai di data frame
             df.at[index, 'Date'] = date_str
-
     # Konversi kolom 'Date' ke tipe data datetime
     # df['Date'] = pd.to_datetime(df['Date'], errors='coerce')  
     df['Date'] = pd.to_datetime(df['Date'], format='%d/%m/%Y', errors='coerce')
-    
     return df
 
-   
+
+
             
 def saveVendorToDatabase(df, request, failed_invoices, successful_invoices):
+    new_invoices=[]
     """Menyimpan data dari DataFrame ke database."""
     fuel_vendor_list = []
     # Menyimpan data ke database
@@ -246,15 +240,14 @@ def saveVendorToDatabase(df, request, failed_invoices, successful_invoices):
 
         # sebelum menyimpan data, cek apakah data sudah ada di database, cek berdasarkan Invoice
         if FuelVendor.objects.filter(Invoice=row["Invoice"]).exists():
-            failed_invoices.append(row["Invoice"])
+            new_invoices.append(fuel_vendor)
         else:
             fuel_vendor_list.append(fuel_vendor)
+            new_invoices.append(fuel_vendor)
             successful_invoices.append(row["Invoice"])
     # Menyimpan semua objek fuel_vendor dalam satu transaksi
     FuelVendor.objects.bulk_create(fuel_vendor_list)
-    return fuel_vendor_list
-
-
+    return new_invoices
 
 
                     
@@ -279,10 +272,7 @@ def reconcile_data_occ_less_than_vendor(fuel_occ, fuel_vendor, missing_data_vend
     # Ambil detail invoice yang hilang dari fuel_occ
     missing_invoice_occ.extend(item for item in fuel_occ if item["Invoice"] in missing_invoices_occ)
 
-    return missing_data_vendor, missing_data_occ, missing_invoice_vendor, missing_invoice_occ
-
-                    
-            
+    return missing_data_vendor, missing_data_occ, missing_invoice_vendor, missing_invoice_occ        
 # fungsi rekonsiliasi data jika len_fuel_occ dan len_fuel_vendor sama
 def reconcile_data_occ_equal_vendor(fuel_occ, fuel_vendor, missing_data_vendor, missing_data_occ, missing_invoice_vendor, missing_invoice_occ):
     # Ambil set invoice untuk fuel_occ dan fuel_vendor
@@ -343,6 +333,7 @@ def reconcile_data_occ_greater_than_vendor(fuel_occ, fuel_vendor, missing_data_v
     missing_invoice_vendor.extend(item for item in fuel_vendor if item.Invoice in missing_invoices_vendor)
 
     return missing_data_vendor, missing_data_occ, missing_invoices_occ, missing_invoice_vendor
+
 
 
 

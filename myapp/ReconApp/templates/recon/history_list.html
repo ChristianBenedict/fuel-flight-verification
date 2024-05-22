@@ -249,49 +249,7 @@
         {% endif %}
         <!--/Card-->
 
-        <!--Cardc3-->
-        {% if missing_invoices_in_occ %}
-        <div id='recipients' class="p-8 mt-6 lg:mt-10 rounded ">
-            <p class="text-sm font-semibold leading-6 text-gray-600 pb-2"><span class="text-red-600">**</span>Data Yang Terdapat Pada Rekaman IAA Tetapi Tidak Ditemukan Dalam Tagiahn Vendor</p>
-            <table id="example3"
-                class=" hover mt-10 ring-1 ring-gray-300  sm:rounded-lg"
-                style="width:100%; padding-top: 1em;  padding-bottom: 1em;">
-                <thead>
-                    <tr>
-                        <th data-priority="1">Invoice #</th>
-                        <th data-priority="2">Date</th>
-                        <th data-priority="3">Flight</th>
-                        <th data-priority="4">Dep</th>
-                        <th data-priority="5">Arr</th>
-                        <th data-priority="6">Reg </th>
-                        <th data-priority="7">Fuel Agent Name</th>
-                        <th data-priority="8">Uplift In Lts By IAA</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for missing in missing_invoices_in_occ %}
-                    <tr>
-                        <td class="text-center">{{ missing.invoice_no }}</td>
-                        <td class="text-center">{{ missing.date|date:"M. d, Y" }}</td>
-                        <td class="text-center">{{ missing.flight }}</td>
-                        <td class="text-center">{{ missing.departure }}</td>
-                        <td class="text-center">{{ missing.arrival }}</td>
-                        <td class="text-center">{{ missing.registration }}</td>
-                        <td class="text-center">{{ missing.fuel_agent }}</td>
-                        <td class="text-center">{{ missing.uplift_in_lts|floatformat:"-0"|intcomma }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot class="">
-                    <tr>
-                        <th colspan="7" style="text-align:left; " class=" -mr-20">Total Uplift In Lts By IAA:</th>
-                        <th>{{ total_missing_invoices_in_occ|floatformat:"-0"|intcomma }} lts</th>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-        {% endif %}
-        <!--/Card-->
+
 
 
     </div>
@@ -321,16 +279,6 @@
                 .columns.adjust()
                 .responsive.recalc();
         });
-
-        $(document).ready(function() {
-            var table = $('#example3').DataTable({
-                    responsive: true
-                })
-                .columns.adjust()
-                .responsive.recalc();
-        });
 	</script>
-    
-
 </div>
 {% endblock content %}

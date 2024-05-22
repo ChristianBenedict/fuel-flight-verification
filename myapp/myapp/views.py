@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from .utils import process_uploaded_file, saveVendorToDatabase
 from .utils import get_data_occ, change_data_fuel, reconcile_data_occ_less_than_vendor
 from .utils import reconcile_data_occ_equal_vendor, reconcile_data_occ_greater_than_vendor
-from ReconApp.models import  Result, DetailResult,MissingInvoiceInVendor,MissingInvoiceInOcc
+from ReconApp.models import  Result, DetailResult,MissingInvoiceInVendor
 
 
 # Create your views here.
@@ -24,6 +24,11 @@ def index(request):
         failed_invoices = [] # List untuk menyimpan invoice yang sudah ada di database
         fuel_vendor = None
         fuel_occ = None
+        total_occ = 0
+        total_vendor = 0
+        total_selisih = 0
+        data_start_date = None
+        data_end_date = None
         
         if request.method == "POST" :
             # memeriksa validate form
@@ -38,7 +43,6 @@ def index(request):
                 fuel_vendor=saveVendorToDatabase(df, request, failed_invoices, successful_invoices)
                 data_start_date = request.POST.get("date_of_data")  
                 data_end_date=request.POST.get("end_date_data")  
-                # Mendapatkan data dari Google Sheet
                 vendor = request.POST.get("vendor")
                 fuel_occ = get_data_occ(data_start_date, data_end_date, vendor)
                 total_occ, total_vendor = change_data_fuel(fuel_occ, fuel_vendor)
@@ -133,29 +137,7 @@ def index(request):
                         )
                         missing_invoice_in_vendor_objects.append(missing_invoice_obj)                    
                     MissingInvoiceInVendor.objects.bulk_create(missing_invoice_in_vendor_objects)
-                    
-                missing_invoice_in_occ_objects=[]
-                if missing_invoice_occ:
-                    for i in range(len(missing_invoice_occ)):
-                        # Konversi format tanggal dari DD/MM/YYYY ke YYYY-MM-DD
-                        date_formated = datetime.strptime(
-                            missing_invoice_occ[i]["Date"], "%d/%m/%Y").strftime("%Y-%m-%d")
-                        
-                        # Membuat objek MissingInvoice dan menyimpannya ke database
-                        missing_invoice_occ_obj = MissingInvoiceInOcc(
-                            result=result_obj,
-                            date=date_formated,
-                            flight=missing_invoice_occ[i]["Flight"],
-                            departure=missing_invoice_occ[i]["Dep"],
-                            arrival=missing_invoice_occ[i]["Arr"],
-                            registration=missing_invoice_occ[i]["Reg"],
-                            uplift_in_lts=missing_invoice_occ[i]["Uplift_in_Lts"],
-                            invoice_no=missing_invoice_occ[i]["Invoice"],
-                            fuel_agent=missing_invoice_occ[i]["Fuel_Agent"],
-                        )
-                        missing_invoice_in_occ_objects.append(missing_invoice_occ_obj)
-                    MissingInvoiceInOcc.objects.bulk_create(missing_invoice_in_occ_objects)
-        
+                            
             return redirect('result') 
 
         # ambil user yang login

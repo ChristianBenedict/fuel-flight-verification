@@ -75,23 +75,3 @@ class MissingInvoiceInVendor(models.Model):
             print(f"Invalid values: uplift_in_lts={self.uplift_in_lts}")
             
 
-class MissingInvoiceInOcc(models.Model):
-    result = models.ForeignKey(Result, on_delete=models.CASCADE, related_name='missing_invoices_in_occ')
-    date = models.DateField(blank=True, null=True)
-    flight = models.CharField(max_length=100, default='', blank=True, null=True)
-    departure = models.CharField(max_length=100, default='', blank=True, null=True)
-    arrival = models.CharField(max_length=100, default='', blank=True, null=True)
-    registration = models.CharField(max_length=100, default='', blank=True, null=True)
-    uplift_in_lts = models.FloatField(default=0, blank=True, null=True)
-    invoice_no = models.CharField(max_length=100, default='', blank=True, null=True)
-    fuel_agent = models.CharField(max_length=100, default='', blank=True, null=True)
-    
-    def __str__(self):
-        return f"{self.date} - {self.flight} - {self.registration}"
-    
-    def save(self, *args, **kwargs):
-        try:
-            super().save(*args, **kwargs)
-        except ValidationError as e:
-            print(f"Error saving MissingInvoiceInOcc: {e}")
-            print(f"Invalid values: uplift_in_lts={self.uplift_in_lts}")
