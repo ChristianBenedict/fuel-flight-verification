@@ -115,8 +115,6 @@ def get_data_occ(data_start_date, data_end_date, vendor):
         return None
 
     
-    
-    
 def change_data_fuel(fuel_occ, fuel_vendor):
     total_occ = 0
     total_vendor = 0

@@ -139,26 +139,7 @@
 
 <div class="mt-10 text-gray-900 tracking-wider leading-normal text-sm">
     <!--Container-->
-    <div class=" mx-auto px-2 ">
-        <!-- bagian 1 -->
-        <!-- <div class="flex-1 mx-8">
-            <ul role="list"
-                class="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
-                <li class="col-span-1 flex rounded-md shadow-sm">
-                    <div
-                        class="flex flex-1 items-center justify-between  rounded border border-gray-400 bg-white">
-                        <div class="flex-1 truncate px-4 py-2 text-sm">
-                            <a href="#"
-                                class="font-medium text-gray-900 hover:text-gray-600">Totals
-                                Uplift in Lts :</a>
-                            <p
-                                class="font-semibold text-gray-900">{{total_uplift_in_lts|floatformat:0|intcomma }}</p>
-                        </div>
-                    </div>
-                </li>
-            </ul>
-        </div> -->
-        
+    <div class=" mx-auto px-2 ">        
         <!--Card 1-->
         <div id='recipients' class="p-8 mt-6 lg:mt-0 rounded ">
             <p class="text-sm font-semibold leading-6 text-gray-600 pb-2"> <span class="text-red-600">**</span> Daftar Tagihan pembelian Fuel dari vendor yang tidak sesuai dengan rekaman IAA</p>
@@ -191,11 +172,11 @@
                         <td class="text-center">{{ detail.fuel_agent }}</td>
                         <td class="text-center">{{ detail.uplift_in_lts_occ|floatformat:"-0"|intcomma }}</td>
                         <td class="text-center">{{ detail.uplift_in_lts_ven|floatformat:"-0"|intcomma }}</td>
-                        <td class="text-center">{{ detail.selisih|floatformat:"-0"|intcomma }}</td>
+                        <td class="text-center"><span class="{% if detail.selisih < 0 %}bg-red-300 px-2 rounded-sm{% else %}bg-green-300 px-3 rounded-sm{% endif %}">{{ detail.selisih|floatformat:"-0"|intcomma }}</span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
-                <tfoot class="">
+                <tfoot>
                     <tr>
                         <th colspan="9" style="text-align:left">Total Selisih:</th>
                         <th>{{ total_selisih_fuel|floatformat:"-0"|intcomma }} lts</th>
@@ -234,7 +215,7 @@
                         <td class="text-center">{{ missing.arrival }}</td>
                         <td class="text-center">{{ missing.registration }}</td>
                         <td class="text-center">{{ missing.fuel_agent }}</td>
-                        <td class="text-center">{{ missing.uplift_in_lts|floatformat:"-0"|intcomma }}</td>
+                        <td class="text-center"><span class="rounded-md whitespace-nowrap mt-0.5 px-2 py-0.5 text-sm font-medium bg-red-300">{{ missing.uplift_in_lts|floatformat:"-0"|intcomma }}</span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
